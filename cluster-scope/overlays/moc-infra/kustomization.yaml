@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
 - ../../base/config.openshift.io/oauths/cluster
+- ../../bundles/longhorn
 
 patches:
   - path: oauths/cluster_patch.yaml
