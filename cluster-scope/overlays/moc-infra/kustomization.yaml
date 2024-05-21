@@ -8,6 +8,7 @@ resources:
 - ../../base/rbac.authorization.k8s.io/clusterrolebindings/self-provisioners
 - ../../base/user.openshift.io/groups/cluster-admins
 - ../../base/user.openshift.io/groups/cluster-readers
+- ../../bundles/external-secrets
 - ../../bundles/longhorn
 
 patches:
