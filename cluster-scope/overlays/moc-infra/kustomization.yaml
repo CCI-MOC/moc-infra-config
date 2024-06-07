@@ -10,6 +10,7 @@ resources:
 - ../../base/user.openshift.io/groups/cluster-readers
 - ../../bundles/external-secrets
 - ../../bundles/longhorn
+- clustersecretstore/clustersecretstore.yaml
 
 patches:
   - path: oauths/cluster_patch.yaml

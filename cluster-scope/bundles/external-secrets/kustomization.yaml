@@ -6,3 +6,4 @@ resources:
 - ../../base/core/namespaces/external-secrets-operator
 - ../../base/operators.coreos.com/subscriptions/external-secrets-operator
 - ../../base/operators.coreos.com/operatorgroups/external-secrets
+- ../../base/operator.external-secrets.io/operatorconfig/cluster
