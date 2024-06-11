@@ -13,6 +13,7 @@ resources:
 - clustersecretstore/clustersecretstore.yaml
 - externalsecrets/
 - machineconfigs/
+- longhorn-settings
 
 patches:
   - path: oauths/cluster_patch.yaml
