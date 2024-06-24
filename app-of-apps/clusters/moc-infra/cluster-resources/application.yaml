@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cluster-resources
+spec:
+  destination:
+    name: in-cluster
+    namespace: openshift-gitops
+  project: default
+  source:
+    path: cluster-scope/overlays/moc-infra
+    repoURL: https://github.com/CCI-MOC/moc-infra-config.git
+    targetRevision: HEAD
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - Validate=false
+    - ApplyOutOfSyncOnly=true
