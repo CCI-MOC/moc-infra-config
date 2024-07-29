@@ -12,6 +12,7 @@ resources:
 - ../../bundles/external-secrets
 - ../../bundles/longhorn
 - ../../bundles/openshift-gitops-operator
+- ../../bundles/openshift-cert-manager-operator/
 - clustersecretstore/clustersecretstore.yaml
 - externalsecrets/
 - machineconfigs/
