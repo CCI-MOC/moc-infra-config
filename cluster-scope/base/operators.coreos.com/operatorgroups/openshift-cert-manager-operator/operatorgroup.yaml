@@ -3,4 +3,5 @@ kind: OperatorGroup
 metadata:
   name: openshift-cert-manager-operator
 spec:
-  upgradeStrategy: Default
+  targetNamespaces:
+  - "cert-manager-operator"
