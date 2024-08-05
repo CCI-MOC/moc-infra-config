@@ -1,0 +1,28 @@
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: aws-route53-credentials-es
+  namespace: openshift-config
+spec:
+  secretStoreRef:
+    name: aws-secret-store
+    kind: ClusterSecretStore
+  refreshInterval: "1h"
+  target:
+    name: aws-route53-credentials
+    creationPolicy: Owner
+    deletionPolicy: Retain
+    template:
+      metadata:
+        annotations:
+         argocd.argoproj.io/compare-options: IgnoreExtraneous
+         argocd.argoproj.io/sync-options: Prune=false
+  data:
+    - secretKey: AWS_ACCESS_KEY_ID
+      remoteRef:
+        key: cluster/moc-infra/aws-route53-credentials
+        property: AWS_ACCESS_KEY_ID
+    - secretKey: AWS_SECRET_ACCESS_KEY
+      remoteRef:
+        key: cluster/moc-infra/aws-route53-credentials
+        property: AWS_SECRET_ACCESS_KEY
