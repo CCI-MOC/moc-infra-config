@@ -13,8 +13,10 @@ resources:
 - ../../bundles/longhorn
 - ../../bundles/openshift-gitops-operator
 - ../../bundles/openshift-cert-manager-operator/
+- ../../bundles/openshift-cnv
 - clustersecretstore/clustersecretstore.yaml
 - externalsecrets/
+- hyperconverged/kubevirt-hyperconverged.yaml
 - machineconfigs/
 - longhorn-settings
 
