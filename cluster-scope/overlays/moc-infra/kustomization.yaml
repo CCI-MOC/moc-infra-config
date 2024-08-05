@@ -16,6 +16,7 @@ resources:
 - ../../bundles/openshift-cnv
 - clustersecretstore/clustersecretstore.yaml
 - externalsecrets/
+- hyperconverged/kubevirt-hyperconverged.yaml
 - machineconfigs/
 - longhorn-settings
 
