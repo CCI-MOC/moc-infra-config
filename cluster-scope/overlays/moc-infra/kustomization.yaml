@@ -14,6 +14,7 @@ resources:
 - ../../bundles/openshift-gitops-operator
 - ../../bundles/openshift-cert-manager-operator/
 - ../../bundles/openshift-cnv
+- ../../cert-manager.io/clusterissuers/letsencrypt-production-dns01
 - clustersecretstore/clustersecretstore.yaml
 - externalsecrets/
 - hyperconverged/kubevirt-hyperconverged.yaml
