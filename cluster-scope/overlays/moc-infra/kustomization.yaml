@@ -18,6 +18,7 @@ resources:
 - ../../bundles/openshift-cnv
 - ../../cert-manager.io/clusterissuers/letsencrypt-production-dns01
 - clustersecretstore/clustersecretstore.yaml
+- certificates/
 - externalsecrets/
 - hyperconverged/kubevirt-hyperconverged.yaml
 - machineconfigs/
