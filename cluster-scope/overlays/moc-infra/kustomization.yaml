@@ -3,6 +3,8 @@ kind: Kustomization
 
 resources:
 - ../../base/config.openshift.io/oauths/cluster
+- ../../base/config.openshift.io/apiservers/cluster
+- ../../base/operator.openshift.io/ingresscontrollers/default
 - ../../base/rbac.authorization.k8s.io/clusterrolebindings/cluster-admins-sudoer
 - ../../base/rbac.authorization.k8s.io/clusterrolebindings/cluster-admins-reader/
 - ../../base/rbac.authorization.k8s.io/clusterrolebindings/cluster-reader
@@ -16,6 +18,7 @@ resources:
 - ../../bundles/openshift-cnv
 - ../../cert-manager.io/clusterissuers/letsencrypt-production-dns01
 - clustersecretstore/clustersecretstore.yaml
+- certificates/
 - externalsecrets/
 - hyperconverged/kubevirt-hyperconverged.yaml
 - machineconfigs/
@@ -25,3 +28,10 @@ patches:
   - path: oauths/cluster_patch.yaml
   - path: groups/cluster-admins.yaml
   - path: groups/cluster-readers.yaml
+  - target:
+      kind: APIServer
+      name: cluster
+    patch: |
+      - op: replace
+        path: /spec/servingCerts/namedCertificates/0/names/0
+        value: api.moc-infra.massopen.cloud
