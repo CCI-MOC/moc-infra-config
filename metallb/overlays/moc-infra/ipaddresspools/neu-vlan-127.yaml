@@ -1,0 +1,7 @@
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: neu-vlan-127
+spec:
+  addresses:
+  - 129.10.5.10-129.10.5.40
