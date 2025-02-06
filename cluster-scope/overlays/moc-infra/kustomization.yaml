@@ -15,6 +15,7 @@ resources:
 - ../../bundles/external-secrets
 - ../../bundles/longhorn
 - ../../bundles/metallb-system
+- ../../bundles/nmstate
 - ../../bundles/openshift-gitops-operator
 - ../../bundles/openshift-cert-manager-operator/
 - ../../bundles/openshift-cnv
