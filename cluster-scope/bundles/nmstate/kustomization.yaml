@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+commonLabels:
+  massopen.cloud/bundle: metallb
+resources:
+- ../../base/core/namespaces/openshift-nmstate/
+- ../../base/nmstate.io/nmstates/nmstate
+- ../../base/operators.coreos.com/operatorgroups/openshift-nmstate
+- ../../base/operators.coreos.com/subscriptions/kubernetes-nmstate-operator
