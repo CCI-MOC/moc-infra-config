@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: idrac-exporter
+spec:
+  ports:
+    - name: metrics
+      port: 9348
+      targetPort: 9348
+  selector:
+    app: idrac-exporter

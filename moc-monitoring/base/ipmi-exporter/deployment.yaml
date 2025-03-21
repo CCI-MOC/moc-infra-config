@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ipmi-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ipmi-exporter
+  template:
+    metadata:
+      labels:
+        app: ipmi-exporter
+    spec:
+      containers:
+        - name: ipmi-exporter
+          image: quay.io/prometheuscommunity/ipmi-exporter:v1.10.0
+          args:
+            - "--config.file=/etc/ipmi-exporter/config.yml"
+          ports:
+            - containerPort: 9290
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/ipmi-exporter
+      volumes:
+        - name: config-volume
+          configMap:
+            name: ipmi-exporter-config
