@@ -3,7 +3,5 @@ kind: Kustomization
 namespace: moc-monitoring
 
 resources:
-- deployment.yaml
-- configmaps
-- service.yaml
-- pvc.yaml
+- ipmi_targets.yaml
+- prometheus_config.yaml

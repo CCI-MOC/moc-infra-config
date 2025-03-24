@@ -22,13 +22,20 @@ spec:
           - containerPort: 9090
         volumeMounts:
           - name: config-volume
-            mountPath: /etc/prometheus/
+            mountPath: /etc/prometheus/prometheus.yml
+            subPath: prometheus.yml
           - name: prometheus-storage
             mountPath: /prometheus
+          - name: ipmi-targets
+            mountPath: /etc/prometheus/file_sd/ipmi_targets.yaml
+            subPath: ipmi_targets.yaml
       volumes:
         - name: config-volume
           configMap:
             name: prometheus-config
+        - name: ipmi-targets
+          configMap:
+            name: ipmi-targets
         - name: prometheus-storage
           persistentVolumeClaim:
             claimName: prometheus-pvc

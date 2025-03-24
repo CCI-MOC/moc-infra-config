@@ -9,8 +9,9 @@ data:
 
     scrape_configs:
       - job_name: "idrac"
-        static_configs:
-          - targets: ['10.2.14.121']
+        file_sd_configs:
+        - files:
+          - /etc/prometheus/file_sd/ipmi_targets.yaml
         relabel_configs:
           - source_labels: [__address__]
             target_label: __param_target
@@ -20,8 +21,9 @@ data:
             replacement: idrac-exporter.moc-monitoring.svc:9348
 
       - job_name: "idrac_web"
-        static_configs:
-          - targets: ['10.2.14.121']
+        file_sd_configs:
+        - files:
+          - /etc/prometheus/file_sd/ipmi_targets.yaml
         metrics_path: /probe
         params:
           module:
@@ -35,8 +37,9 @@ data:
           replacement: blackbox-exporter.moc-monitoring.svc:9115
 
       - job_name: "idrac_ping"
-        static_configs:
-          - targets: ['10.2.14.121']
+        file_sd_configs:
+        - files:
+          - /etc/prometheus/file_sd/ipmi_targets.yaml
         metrics_path: /probe
         params:
           module:
@@ -53,8 +56,9 @@ data:
         params:
           module: ['default']
         metrics_path: /ipmi
-        static_configs:
-          - targets: ['10.2.14.121']
+        file_sd_configs:
+        - files:
+          - /etc/prometheus/file_sd/ipmi_targets.yaml
         relabel_configs:
           - source_labels: [__address__]
             target_label: __param_target
