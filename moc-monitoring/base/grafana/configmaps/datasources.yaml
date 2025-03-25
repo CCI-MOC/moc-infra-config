@@ -12,4 +12,4 @@ data:
         url: "http://prometheus.moc-monitoring.svc:9090"
         isDefault: true
         jsonData:
-          timeInterval: "10s"
+          timeInterval: "60s"
