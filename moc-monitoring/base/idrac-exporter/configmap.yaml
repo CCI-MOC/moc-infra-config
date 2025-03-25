@@ -10,11 +10,11 @@ data:
     metrics:
       system: true
       sensors: true
-      power: false
+      power: true
       events: true
-      storage: false
-      memory: false
-      network: false
+      storage: true
+      memory: true
+      network: true
     events:
-      severity: critical  # CONFIG_EVENTS_SEVERITY=warning
+      severity: warning  # CONFIG_EVENTS_SEVERITY=warning
       maxage: 7d         # CONFIG_EVENTS_MAXAGE=7d
