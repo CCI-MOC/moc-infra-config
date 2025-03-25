@@ -7,3 +7,4 @@ resources:
 - configmaps
 - service.yaml
 - pvc.yaml
+- route.yaml
