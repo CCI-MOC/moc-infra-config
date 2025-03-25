@@ -3,9 +3,5 @@ kind: Kustomization
 namespace: moc-monitoring
 
 resources:
-- deployment.yaml
-- service.yaml
-- pvc.yaml
-- route.yaml
-- configmaps
-- dashboards
+- datasources.yaml
+- grafana-dashboard-providers.yaml

@@ -3,9 +3,6 @@ kind: Kustomization
 namespace: moc-monitoring
 
 resources:
-- deployment.yaml
-- service.yaml
-- pvc.yaml
-- route.yaml
-- configmaps
-- dashboards
+- idrac.yaml
+- idrac-overview.yaml
+- status-alternative.yaml
