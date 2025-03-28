@@ -3,5 +3,6 @@ kind: Kustomization
 resources:
   - cluster-resources
   - metallb
+  - moc-monitoring
 
 nameSuffix: -moc-infra

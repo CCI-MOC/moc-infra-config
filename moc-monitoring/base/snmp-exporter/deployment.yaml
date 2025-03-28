@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: snmp-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: snmp-exporter
+  template:
+    metadata:
+      labels:
+        app: snmp-exporter
+    spec:
+      volumes:
+        - name: config-storage
+          emptyDir: {}
+        - name: generator-config
+          configMap:
+            name: snmp-generator-config
+      initContainers:
+        - name: snmp-config-generator
+          image: ghcr.io/ocp-on-nerc/snmp-config-generator:latest
+          command:
+            - sh
+            - -c
+            - |
+              generator generate -m /mibs -g /config/generator.yml -o /config-output/snmp.yml
+          volumeMounts:
+            - name: config-storage
+              mountPath: /config-output
+            - name: generator-config
+              mountPath: /config
+      containers:
+        - name: snmp-exporter
+          image: quay.io/prometheus/snmp-exporter:latest
+          args:
+            - "--config.file=/config/snmp.yml"
+          ports:
+            - containerPort: 9116
+          volumeMounts:
+            - name: config-storage
+              mountPath: /config

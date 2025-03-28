@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: idrac-exporter
+  labels:
+    app: idrac-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: idrac-exporter
+  template:
+    metadata:
+      labels:
+        app: idrac-exporter
+    spec:
+      containers:
+        - name: idrac-exporter
+          image: mrlhansen/idrac_exporter:latest
+          ports:
+            - containerPort: 9348
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/prometheus/idrac.yml
+              subPath: idrac.yml
+          env:
+          - name: CONFIG_DEFAULT_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: idrac-credentials
+                key: username
+          - name: CONFIG_DEFAULT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: idrac-credentials
+                key: password
+      volumes:
+        - name: config-volume
+          configMap:
+            name: idrac-exporter-config

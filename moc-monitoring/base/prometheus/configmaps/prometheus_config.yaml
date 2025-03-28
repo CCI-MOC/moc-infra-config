@@ -1,0 +1,100 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 1m
+      scrape_timeout: 1m
+      evaluation_interval: 1m
+
+    scrape_configs:
+      - job_name: "idrac_exporter"
+        scrape_interval: 3m
+        scrape_timeout: 2m
+        file_sd_configs:
+        - files:
+          - /etc/prometheus/file_sd/idrac_targets.yaml
+        relabel_configs:
+          - source_labels: [__address__]
+            target_label: __param_target
+          - source_labels: [__param_target]
+            target_label: instance
+          - target_label: __address__
+            replacement: idrac-exporter.moc-monitoring.svc:9348
+
+      - job_name: "idrac_web"
+        file_sd_configs:
+        - files:
+          - /etc/prometheus/file_sd/idrac_targets.yaml
+          - /etc/prometheus/file_sd/cmc_targets.yaml
+        metrics_path: /probe
+        params:
+          module:
+          - http_302
+        relabel_configs:
+        - source_labels: [__address__]
+          target_label: __param_target
+        - source_labels: [__param_target]
+          target_label: instance
+        - target_label: __address__
+          replacement: blackbox-exporter.moc-monitoring.svc:9115
+
+      - job_name: "idrac_ping"
+        file_sd_configs:
+        - files:
+          - /etc/prometheus/file_sd/idrac_targets.yaml
+          - /etc/prometheus/file_sd/cmc_targets.yaml
+        metrics_path: /probe
+        params:
+          module:
+          - ping
+        relabel_configs:
+        - source_labels: [__address__]
+          target_label: __param_target
+        - source_labels: [__param_target]
+          target_label: instance
+        - target_label: __address__
+          replacement: blackbox-exporter.moc-monitoring.svc:9115
+
+      - job_name: "ipmi"
+        params:
+          module: ['default']
+        metrics_path: /ipmi
+        file_sd_configs:
+        - files:
+          - /etc/prometheus/file_sd/idrac_targets.yaml
+        relabel_configs:
+          - source_labels: [__address__]
+            target_label: __param_target
+          - source_labels: [__param_target]
+            target_label: instance
+          - target_label: __address__
+            replacement: ipmi-exporter.moc-monitoring.svc:9290
+
+      - job_name: "idrac_snmp"
+        file_sd_configs:
+        - files:
+          - /etc/prometheus/file_sd/idrac_targets.yaml
+        metrics_path: /snmp
+        params:
+          module:
+            - system
+            - layer2
+            - layer3
+            - idrac
+          auth: [public_v2]
+        relabel_configs:
+        - source_labels: [__address__]
+          target_label: __param_target
+        - source_labels: [__param_target]
+          target_label: instance
+        - target_label: __address__
+          replacement: snmp-exporter.moc-monitoring.svc:9116
+        metric_relabel_configs:
+        - source_labels: [__name__]
+          target_label: __name__
+          regex: '(.*)'
+          action: replace
+          replacement: 'snmp_${1}'
