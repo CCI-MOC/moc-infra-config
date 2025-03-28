@@ -28,6 +28,7 @@ data:
         file_sd_configs:
         - files:
           - /etc/prometheus/file_sd/idrac_targets.yaml
+          - /etc/prometheus/file_sd/cmc_targets.yaml
         metrics_path: /probe
         params:
           module:
@@ -44,6 +45,7 @@ data:
         file_sd_configs:
         - files:
           - /etc/prometheus/file_sd/idrac_targets.yaml
+          - /etc/prometheus/file_sd/cmc_targets.yaml
         metrics_path: /probe
         params:
           module:
