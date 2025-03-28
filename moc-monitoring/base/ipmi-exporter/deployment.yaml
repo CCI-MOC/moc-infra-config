@@ -12,6 +12,30 @@ spec:
       labels:
         app: ipmi-exporter
     spec:
+      initContainers:
+        - name: init-config
+          image: docker.io/gomplate/gomplate:v4.3.0-alpine
+          volumeMounts:
+            - name: config-volume
+              mountPath: /config
+            - name: config-template-volume
+              mountPath: /config-template
+          command:
+            - sh
+            - -c
+            - |
+              gomplate -f /config-template/config_template.yml -o /config/config.yml
+          env:
+            - name: IPMI_USER
+              valueFrom:
+                secretKeyRef:
+                  name: idrac-credentials
+                  key: username
+            - name: IPMI_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: idrac-credentials
+                  key: password
       containers:
         - name: ipmi-exporter
           image: quay.io/prometheuscommunity/ipmi-exporter:v1.10.0
@@ -24,5 +48,7 @@ spec:
               mountPath: /etc/ipmi-exporter
       volumes:
         - name: config-volume
+          emptyDir: {}
+        - name: config-template-volume
           configMap:
-            name: ipmi-exporter-config
+            name: ipmi-exporter-config-template
