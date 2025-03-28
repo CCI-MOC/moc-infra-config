@@ -11,9 +11,11 @@ data:
 
     scrape_configs:
       - job_name: "idrac_exporter"
+        scrape_interval: 3m
+        scrape_timeout: 2m
         file_sd_configs:
         - files:
-          - /etc/prometheus/file_sd/ipmi_targets.yaml
+          - /etc/prometheus/file_sd/idrac_targets.yaml
         relabel_configs:
           - source_labels: [__address__]
             target_label: __param_target
@@ -25,7 +27,7 @@ data:
       - job_name: "idrac_web"
         file_sd_configs:
         - files:
-          - /etc/prometheus/file_sd/ipmi_targets.yaml
+          - /etc/prometheus/file_sd/idrac_targets.yaml
         metrics_path: /probe
         params:
           module:
@@ -41,7 +43,7 @@ data:
       - job_name: "idrac_ping"
         file_sd_configs:
         - files:
-          - /etc/prometheus/file_sd/ipmi_targets.yaml
+          - /etc/prometheus/file_sd/idrac_targets.yaml
         metrics_path: /probe
         params:
           module:
@@ -60,7 +62,7 @@ data:
         metrics_path: /ipmi
         file_sd_configs:
         - files:
-          - /etc/prometheus/file_sd/ipmi_targets.yaml
+          - /etc/prometheus/file_sd/idrac_targets.yaml
         relabel_configs:
           - source_labels: [__address__]
             target_label: __param_target
@@ -72,7 +74,7 @@ data:
       - job_name: "idrac_snmp"
         file_sd_configs:
         - files:
-          - /etc/prometheus/file_sd/ipmi_targets.yaml
+          - /etc/prometheus/file_sd/idrac_targets.yaml
         metrics_path: /snmp
         params:
           module:
