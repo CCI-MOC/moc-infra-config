@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ipmi-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ipmi-exporter
+  template:
+    metadata:
+      labels:
+        app: ipmi-exporter
+    spec:
+      initContainers:
+        - name: init-config
+          image: docker.io/gomplate/gomplate:v4.3.0-alpine
+          volumeMounts:
+            - name: config-volume
+              mountPath: /config
+            - name: config-template-volume
+              mountPath: /config-template
+          command:
+            - sh
+            - -c
+            - |
+              gomplate -f /config-template/config_template.yml -o /config/config.yml
+          env:
+            - name: IPMI_USER
+              valueFrom:
+                secretKeyRef:
+                  name: idrac-credentials
+                  key: username
+            - name: IPMI_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: idrac-credentials
+                  key: password
+      containers:
+        - name: ipmi-exporter
+          image: quay.io/prometheuscommunity/ipmi-exporter:v1.10.0
+          args:
+            - "--config.file=/etc/ipmi-exporter/config.yml"
+          ports:
+            - containerPort: 9290
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/ipmi-exporter
+      volumes:
+        - name: config-volume
+          emptyDir: {}
+        - name: config-template-volume
+          configMap:
+            name: ipmi-exporter-config-template
