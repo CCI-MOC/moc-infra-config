@@ -15,22 +15,38 @@ spec:
       volumes:
         - name: config-storage
           emptyDir: {}
-        - name: generator-config
+        - name: snmp-generator-config-template
           configMap:
-            name: snmp-generator-config
+            name: snmp-generator-config-template
       initContainers:
+        - name: insert-secret
+          image: docker.io/gomplate/gomplate:v4.3.0-alpine
+          volumeMounts:
+            - name: config-storage
+              mountPath: /config
+            - name: snmp-generator-config-template
+              mountPath: /config-template
+          command:
+            - sh
+            - -c
+            - |
+              gomplate -f /config-template/generator_template.yml -o /config/generator.yml
+          env:
+            - name: IPMI_SNMP_COMMUNITY
+              valueFrom:
+                secretKeyRef:
+                  name: ipmi-snmp-community
+                  key: community
         - name: snmp-config-generator
           image: ghcr.io/ocp-on-nerc/snmp-config-generator:latest
           command:
             - sh
             - -c
             - |
-              generator generate -m /mibs -g /config/generator.yml -o /config-output/snmp.yml
+              generator generate -m /mibs -g /config-output/generator.yml -o /config-output/snmp.yml
           volumeMounts:
             - name: config-storage
               mountPath: /config-output
-            - name: generator-config
-              mountPath: /config
       containers:
         - name: snmp-exporter
           image: quay.io/prometheus/snmp-exporter:latest

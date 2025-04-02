@@ -1,16 +1,16 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: snmp-generator-config
+  name: snmp-generator-config-template
 data:
-  generator.yml: |
+  generator_template.yml: |
     auths:
       public_v1:
         version: 1
-        community: "<insert-secret-here>"
+        community: "{{ .Env.IPMI_SNMP_COMMUNITY }}"
       public_v2:
         version: 2
-        community: "<insert-secret-here>"
+        community: "{{ .Env.IPMI_SNMP_COMMUNITY }}"
 
     modules:
       system:

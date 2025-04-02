@@ -7,3 +7,4 @@ resources:
 - prometheus
 - blackbox-exporter
 - ipmi-exporter
+- snmp-exporter
