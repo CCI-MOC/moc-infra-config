@@ -13,3 +13,4 @@ spec:
         name: github-secret
       teams:
       - CCI-MOC/ops-core
+      - CCI-MOC/moc-openshift-people
