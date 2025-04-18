@@ -7,19 +7,11 @@ resources:
 - ../moc-infra/externalsecrets
 
 patches:
+- path: prometheus-alertmanager-patch.yaml
+  target:
+    kind: Deployment
+    name: prometheus
 - path: idrac-exporter-patch.yaml
   target:
     kind: Deployment
     name: idrac-exporter
-- path: grafana-alerting-patch.yaml
-  target:
-    kind: Deployment
-    name: grafana
-- path: grafana-external-alertmanager-patch.yaml
-  target:
-    kind: Deployment
-    name: grafana
-- path: prometheus-alertmanager-patch.yaml
-  target:
-    kind: ConfigMap
-    name: prometheus-config
