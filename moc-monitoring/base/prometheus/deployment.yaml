@@ -24,6 +24,9 @@ spec:
           - name: config-volume
             mountPath: /etc/prometheus/prometheus.yml
             subPath: prometheus.yml
+          - name: rules-volume
+            mountPath: /etc/prometheus/rules/rules.yaml
+            subPath: rules.yaml
           - name: prometheus-storage
             mountPath: /prometheus
           - name: idrac-targets
@@ -36,6 +39,9 @@ spec:
         - name: config-volume
           configMap:
             name: prometheus-config
+        - name: rules-volume
+          configMap:
+            name: prometheus-rules
         - name: idrac-targets
           configMap:
             name: idrac-targets

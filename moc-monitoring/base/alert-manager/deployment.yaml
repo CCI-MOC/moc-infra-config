@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alertmanager
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+      - name: alertmanager
+        image: quay.io/prometheus/alertmanager:v0.25.0
+        args:
+        - "--config.file=/etc/alertmanager/alertmanager.yaml"
+        - "--storage.path=/alertmanager"
+        ports:
+        - name: alertmanager
+          containerPort: 9093
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/alertmanager
+        - name: storage-volume
+          mountPath: /alertmanager
+        - name: secret-slack-webhook
+          mountPath: /etc/alertmanager/secrets
+          readOnly: true
+      volumes:
+      - name: secret-slack-webhook
+        secret:
+          secretName: alertmanager-slack-webhook
+      - name: config-volume
+        configMap:
+          name: alertmanager-config
+      - name: storage-volume
+        persistentVolumeClaim:
+          claimName: alertmanager-pvc

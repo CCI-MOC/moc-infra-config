@@ -8,3 +8,15 @@ resources:
 - service.yaml
 - pvc.yaml
 - route.yaml
+
+configMapGenerator:
+- name: prometheus-rules
+  files:
+  - rules.yaml=config/prometheus-rules.yaml
+  options:
+    disableNameSuffixHash: true
+- name: prometheus-config
+  files:
+  - prometheus.yml=config/prometheus-config.yaml
+  options:
+    disableNameSuffixHash: true

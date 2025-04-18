@@ -1,0 +1,23 @@
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: alertmanager-slack-webhook-es
+spec:
+  secretStoreRef:
+    name: aws-secret-store
+    kind: ClusterSecretStore
+  refreshInterval: "1h" 
+  target:
+    name: alertmanager-slack-webhook
+    creationPolicy: Owner
+    deletionPolicy: Retain 
+    template:
+      metadata:
+        annotations:
+         argocd.argoproj.io/compare-options: IgnoreExtraneous
+         argocd.argoproj.io/sync-options: Prune=false
+  data:
+    - secretKey: webhook
+      remoteRef:
+        key: cluster/moc-infra/alerts-slack-webhook
+        property: webhook
