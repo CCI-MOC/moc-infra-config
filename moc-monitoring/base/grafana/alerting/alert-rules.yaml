@@ -1,0 +1,69 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-alerting-rules
+data:
+  idrac_alerts.yaml: |
+    apiVersion: 1
+    groups:
+        - orgId: 1
+          name: Server Monitoring
+          folder: iDRAC Health Alerts
+          interval: 1m
+          rules:
+            - uid: ceim55agrp81sc
+              title: idRAC Critical Health Status
+              condition: C
+              data:
+                - refId: A
+                  relativeTimeRange:
+                    from: 600
+                    to: 0
+                  datasourceUid: PBFA97CFB590B2093
+                  model:
+                    disableTextWrap: false
+                    editorMode: builder
+                    expr: idrac_system_health{job="idrac_exporter", status="Critical"}
+                    fullMetaSearch: false
+                    includeNullMetadata: true
+                    instant: true
+                    intervalMs: 1000
+                    legendFormat: __auto
+                    maxDataPoints: 43200
+                    range: false
+                    refId: A
+                    useBackend: false
+                - refId: C
+                  datasourceUid: __expr__
+                  model:
+                    conditions:
+                        - evaluator:
+                            params:
+                                - 0
+                            type: gt
+                          operator:
+                            type: and
+                          query:
+                            params:
+                                - C
+                          reducer:
+                            params: []
+                            type: last
+                          type: query
+                    datasource:
+                        type: __expr__
+                        uid: __expr__
+                    expression: A
+                    intervalMs: 1000
+                    maxDataPoints: 43200
+                    refId: C
+                    type: threshold
+              noDataState: NoData
+              execErrState: Error
+              for: 1m
+              annotations:
+                description: Alert triggered when idrac_system_health becomes "Critical"
+                summary: idrac_system_health is Critical
+              isPaused: false
+              notification_settings:
+                receiver: slack-notifications

@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-contact-points
+data:
+  contact_points.yaml: |
+    apiVersion: 1
+    contactPoints:
+      - name: slack-notifications
+        receivers:
+          - uid: slack-notifications
+            type: slack
+            settings:
+              url: https://hooks.slack.com/services/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
+              username: Grafana
+              title: >-
+                [{{ if eq .Status "firing" }}🔥{{ else }}✅{{ end }}] 
+                {{ .CommonLabels.alertname }}
+              text: >-
+                {{ range .Alerts }}
+                *Status:* {{ .Status | title }}
+                *Summary:* {{ .Annotations.summary }}
+                *Description:* {{ .Annotations.description }}
+                *Server:* {{ .Labels.instance }}
+                *Severity:* {{ .Labels.severity | title }}
+                {{ end }}

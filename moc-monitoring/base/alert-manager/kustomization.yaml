@@ -6,7 +6,4 @@ resources:
 - deployment.yaml
 - service.yaml
 - pvc.yaml
-- route.yaml
-- configmaps
-- dashboards
-- alerting
+- configmap.yaml

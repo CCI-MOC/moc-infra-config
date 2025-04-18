@@ -3,10 +3,6 @@ kind: Kustomization
 namespace: moc-monitoring
 
 resources:
-- deployment.yaml
-- service.yaml
-- pvc.yaml
-- route.yaml
-- configmaps
-- dashboards
-- alerting
+- alert-contactpoints.yaml
+- alert-notification-policies.yaml
+- alert-rules.yaml
