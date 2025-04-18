@@ -19,7 +19,7 @@ spec:
          argocd.argoproj.io/compare-options: IgnoreExtraneous
          argocd.argoproj.io/sync-options: Prune=false
   data:
-    - secretKey: webhookURL 
+    - secretKey: webhook
       remoteRef:
         key: cluster/moc-infra/alerts-slack-webhook
         property: webhook

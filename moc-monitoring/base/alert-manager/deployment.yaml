@@ -33,7 +33,7 @@ spec:
         secret:
           secretName: alertmanager-slack-webhook
           items:
-          - key: webhookURL
+          - key: webhook
             path: slack_webhook_url
       - name: config-volume
         configMap:

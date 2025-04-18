@@ -6,3 +6,4 @@ resources:
 - idrac_targets.yaml
 - prometheus_config.yaml
 - cmc_targets.yaml
+- prometheus-rules.yaml
