@@ -5,3 +5,4 @@ namespace: moc-monitoring
 resources:
 - ../../base
 - externalsecrets
+- alerting
