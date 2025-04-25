@@ -10,3 +10,4 @@ resources:
 - snmp-exporter
 - alert-manager
 - grafana
+- ../overlays/alerting
