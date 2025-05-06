@@ -4,5 +4,11 @@ namespace: moc-monitoring
 
 resources:
 - deployment.yaml
-- configmap.yaml
 - service.yaml
+
+configMapGenerator:
+  - name: blackbox-exporter-config
+    options:
+      disableNameSuffixHash: true
+    files:
+    - files/blackbox.yml

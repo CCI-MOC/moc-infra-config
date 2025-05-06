@@ -2,7 +2,21 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: moc-monitoring
 
-resources:
-- idrac.yaml
-- idrac-overview.yaml
-- status-alternative.yaml
+configMapGenerator:
+  - name: grafana-dashboard-idrac-overview
+    options:
+      disableNameSuffixHash: true
+    files:
+    - files/idrac_overview.json
+
+  - name: grafana-dashboard-idrac
+    options:
+      disableNameSuffixHash: true
+    files:
+    - files/idrac_overview.json
+
+  - name: grafana-dashboard-status-alternative
+    options:
+      disableNameSuffixHash: true
+    files:
+    - files/status-alternative.json
