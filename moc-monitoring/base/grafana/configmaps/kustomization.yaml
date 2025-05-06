@@ -2,6 +2,15 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: moc-monitoring
 
-resources:
-- datasources.yaml
-- grafana-dashboard-providers.yaml
+configMapGenerator:
+  - name: grafana-datasources
+    options:
+      disableNameSuffixHash: true
+    files:
+    - files/datasources.yaml
+
+  - name: grafana-dashboard-providers
+    options:
+      disableNameSuffixHash: true
+    files:
+    - files/dashboards.yaml
