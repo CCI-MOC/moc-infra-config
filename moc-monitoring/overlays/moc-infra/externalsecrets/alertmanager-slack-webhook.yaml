@@ -4,12 +4,10 @@ metadata:
   name: alertmanager-slack-webhook-es
 spec:
   secretStoreRef:
-    
     name: aws-secret-store
     kind: ClusterSecretStore
   refreshInterval: "1h" 
   target:
-    
     name: alertmanager-slack-webhook
     creationPolicy: Owner
     deletionPolicy: Retain 
