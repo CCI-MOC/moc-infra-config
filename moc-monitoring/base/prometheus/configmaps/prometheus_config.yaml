@@ -9,6 +9,12 @@ data:
       scrape_timeout: 1m
       evaluation_interval: 1m
 
+    alerting:
+      alertmanagers:
+        - static_configs:
+          - targets:
+            - alertmanager.moc-monitoring.svc:9093
+
     rule_files:
       - /etc/prometheus/rules/rules.yaml
 

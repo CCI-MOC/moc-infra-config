@@ -1,2 +1,4 @@
 moc-monitoring/overlays/testing/
 bin
+.gitignore
+.envrc
