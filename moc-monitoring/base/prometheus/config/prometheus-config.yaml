@@ -101,3 +101,4 @@ scrape_configs:
       regex: '(.*)'
       action: replace
       replacement: 'snmp_${1}'
+      
