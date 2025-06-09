@@ -4,5 +4,4 @@ namespace: moc-monitoring
 
 resources:
 - idrac_targets.yaml
-- prometheus_config.yaml
 - cmc_targets.yaml
