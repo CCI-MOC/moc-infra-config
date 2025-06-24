@@ -4,5 +4,11 @@ namespace: moc-monitoring
 
 resources:
 - deployment.yaml
-- configmap.yaml
 - service.yaml
+
+configMapGenerator:
+  - name: snmp-generator-config-template
+    options:
+      disableNameSuffixHash: true
+    files:
+    - files/generator_template.yml

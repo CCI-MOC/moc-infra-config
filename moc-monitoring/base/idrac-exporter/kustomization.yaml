@@ -4,5 +4,11 @@ namespace: moc-monitoring
 
 resources:
 - deployment.yaml
-- configmap.yaml
 - service.yaml
+
+configMapGenerator:
+  - name: idrac-exporter-config
+    options:
+      disableNameSuffixHash: true
+    files:
+    - files/idrac.yml

@@ -1,0 +1,7 @@
+modules:
+  default:
+    user: "{{ .Env.IPMI_USER }}"
+    pass: "{{ .Env.IPMI_PASS }}"
+    driver: "lanplus"
+    privilege: "user"
+    timeout: 10000

@@ -4,5 +4,11 @@ namespace: moc-monitoring
 
 resources:
 - deployment.yaml
-- configmap.yaml
 - service.yaml
+
+configMapGenerator:
+  - name: ipmi-exporter-config-template
+    options:
+      disableNameSuffixHash: true
+    files:
+    - files/config_template.yml
