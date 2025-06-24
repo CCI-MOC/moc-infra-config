@@ -1,0 +1,43 @@
+groups:
+- name: idrac.alerts
+  rules:
+  - alert: IDRACSystemHealthCritical
+    expr: idrac_system_health{job="idrac_exporter", status="Critical"} > 0
+    for: 10m
+    labels:
+      severity: critical # Adjust severity as needed for Alertmanager routing
+    annotations:
+      summary: "iDRAC system health critical for {{ $labels.instance }}"
+      description: "The iDRAC system health status for {{ $labels.instance }} is Critical for 10 minutes."
+  
+  # Added rules translated from Grafana:
+  - alert: IDRACPowerSupplyCritical
+    expr: idrac_power_supply_health{job="idrac_exporter", status="Critical"} > 0
+    # Assuming 'for' duration wasn't specified or is 10m
+    for: 10m
+    labels:
+      severity: critical 
+    annotations:
+      summary: "iDRAC PSU status critical for {{ $labels.instance }}"
+      description: "A power supply unit status for {{ $labels.instance }} is Critical for 10 minutes."
+
+  - alert: IDRACDriveHealthCritical
+    expr: idrac_drive_health{job="idrac_exporter", status="Critical"} > 0
+    # Assuming 'for' duration wasn't specified or is 10m
+    for: 10m
+    labels:
+      severity: critical
+    annotations:
+      summary: "iDRAC drive health critical for {{ $labels.instance }}"
+      description: "A drive health status for {{ $labels.instance }} is Critical for 10 minutes."
+
+  - alert: IDRACChassisAmbientTempHigh
+    expr: idrac_sensors_temperature{job="idrac_exporter", name="Chassis Ambient Temp"} > 50
+    # Assuming 'for' duration wasn't specified or is 10m
+    for: 10m
+    labels:
+      severity: warning # Temp might be warning instead of critical
+    annotations:
+      summary: "iDRAC chassis ambient temperature high for {{ $labels.instance }}"
+      description: "Chassis Ambient Temp on {{ $labels.instance }} is above 50°C ({{ $value }}°C) for 10 minutes." 
+      
