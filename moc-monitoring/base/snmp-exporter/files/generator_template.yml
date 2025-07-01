@@ -1,0 +1,137 @@
+auths:
+  public_v1:
+    version: 1
+    community: "{{ .Env.IPMI_SNMP_COMMUNITY }}"
+  public_v2:
+    version: 2
+    community: "{{ .Env.IPMI_SNMP_COMMUNITY }}"
+
+modules:
+  system:
+    walk:
+      - SNMPv2-MIB::system
+      - SNMPv2-MIB::snmp
+  layer3:
+    walk:
+      - TCP-MIB::tcp
+      - UDP-MIB::udp
+      - IP-MIB::ipv4InterfaceTable
+  layer2:
+    walk:
+      - IF-MIB::ifTable
+      - IF-MIB::ifXTable
+    lookups:
+      - source_indexes:
+          - ifIndex
+        lookup: ifAlias
+      - source_indexes:
+          - ifIndex
+        lookup: IF-MIB::ifDescr
+      - source_indexes:
+          - ifIndex
+        lookup: IF-MIB::ifName
+    overrides:
+      ifAlias:
+        ignore: true
+      ifDescr:
+        ignore: true
+      ifName:
+        ignore: true
+      ifType:
+        type: EnumAsInfo
+  idrac:
+    walk:
+    - IDRAC-MIB-SMIv2::systemInfoGroup
+    - IDRAC-MIB-SMIv2::statusGroup
+    - IDRAC-MIB-SMIv2::chassisInformationTable
+    - IDRAC-MIB-SMIv2::systemBIOSTable
+    - IDRAC-MIB-SMIv2::firmwareTable
+    - IDRAC-MIB-SMIv2::powerUnitTable
+    - IDRAC-MIB-SMIv2::powerSupplyTable
+    - IDRAC-MIB-SMIv2::voltageProbeTable
+    - IDRAC-MIB-SMIv2::amperageProbeTable
+    - IDRAC-MIB-SMIv2::powerUsageTable
+    - IDRAC-MIB-SMIv2::coolingDeviceTable
+    - IDRAC-MIB-SMIv2::temperatureProbeTable
+    lookups:
+    - source_indexes:
+      - coolingDevicechassisIndex
+      - coolingDeviceIndex
+      lookup: IDRAC-MIB-SMIv2::coolingDeviceStateCapabilities
+    - source_indexes:
+      - coolingDevicechassisIndex
+      - coolingDeviceIndex
+      lookup: IDRAC-MIB-SMIv2::coolingDeviceLocationName
+    - source_indexes:
+      - amperageProbechassisIndex
+      - amperageProbeIndex
+      lookup: IDRAC-MIB-SMIv2::amperageProbeStateCapabilities
+    - source_indexes:
+      - amperageProbechassisIndex
+      - amperageProbeIndex
+      lookup: IDRAC-MIB-SMIv2::amperageProbeLocationName
+    - source_indexes:
+      - powerUsageChassisIndex
+      - powerUsageIndex
+      lookup: IDRAC-MIB-SMIv2::powerUsagePeakAmpsStartDateName
+    - source_indexes:
+      - powerUsageChassisIndex
+      - powerUsageIndex
+      lookup: IDRAC-MIB-SMIv2::powerUsagePeakWattsStartDateName
+    - source_indexes:
+      - powerUsageChassisIndex
+      - powerUsageIndex
+      lookup: IDRAC-MIB-SMIv2::powerUsageCumulativeWattageStartDateName
+    - source_indexes:
+      - temperatureProbechassisIndex
+      - temperatureProbeIndex
+      lookup: temperatureProbeLocationName
+    overrides:
+      IDRAC-MIB-SMIv2::coolingDeviceStateCapabilities:
+        ignore: true
+      IDRAC-MIB-SMIv2::coolingDeviceStateSettings:
+        type: EnumAsInfo
+      IDRAC-MIB-SMIv2::coolingDeviceStatus:
+        type: EnumAsInfo
+      IDRAC-MIB-SMIv2::coolingDeviceType:
+        type: EnumAsInfo
+      IDRAC-MIB-SMIv2::coolingDeviceLocationName:
+        ignore: true
+      IDRAC-MIB-SMIv2::amperageProbeLocationName:
+        ignore: true
+      IDRAC-MIB-SMIv2::amperageProbeStateCapabilities:
+        ignore: true
+      IDRAC-MIB-SMIv2::amperageProbeStateSettings:
+        type: EnumAsInfo
+      IDRAC-MIB-SMIv2::amperageProbeStatus:
+        type: EnumAsInfo
+      IDRAC-MIB-SMIv2::amperageProbeType:
+        type: EnumAsInfo
+      IDRAC-MIB-SMIv2::temperatureProbeType:
+        type: EnumAsInfo
+      IDRAC-MIB-SMIv2::temperatureProbeLocationName:
+        ignore: true
+      IDRAC-MIB-SMIv2::powerUsagePeakAmpsStartDateName:
+        ignore: true
+      IDRAC-MIB-SMIv2::powerUsagePeakWattsStartDateName:
+        ignore: true
+      IDRAC-MIB-SMIv2::powerUsageCumulativeWattageStartDateName:
+        ignore: true
+      IDRAC-MIB-SMIv2::globalSystemStatus:
+        type: EnumAsInfo
+      IDRAC-MIB-SMIv2::systemLCDStatus:
+        type: EnumAsInfo
+      IDRAC-MIB-SMIv2::globalStorageStatus:
+        type: EnumAsInfo
+      IDRAC-MIB-SMIv2::chassisStatus:
+        type: EnumAsInfo
+      IDRAC-MIB-SMIv2::powerSupplyStatus:
+        type: EnumAsInfo
+      IDRAC-MIB-SMIv2::temperatureProbeStatus:
+        type: EnumAsInfo
+      IDRAC-MIB-SMIv2::powerUnitStatus:
+        type: EnumAsInfo
+      IDRAC-MIB-SMIv2::powerUsageStatus:
+        type: EnumAsInfo
+      IDRAC-MIB-SMIv2::firmwareStatus:
+        type: EnumAsInfo

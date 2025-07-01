@@ -4,7 +4,6 @@ namespace: moc-monitoring
 
 resources:
 - deployment.yaml
-- configmaps
 - service.yaml
 - pvc.yaml
 - route.yaml
@@ -20,3 +19,14 @@ configMapGenerator:
   - prometheus.yml=config/prometheus-config.yaml
   options:
     disableNameSuffixHash: true
+- name: cmc-targets
+  files:
+  - files/cmc_targets.yaml
+  options:
+    disableNameSuffixHash: true
+- name: idrac-targets
+  files:
+  - files/idrac_targets.yaml
+  options:
+    disableNameSuffixHash: true
+
