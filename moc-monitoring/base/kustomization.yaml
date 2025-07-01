@@ -8,3 +8,4 @@ resources:
 - blackbox-exporter
 - ipmi-exporter
 - snmp-exporter
+- alert-manager

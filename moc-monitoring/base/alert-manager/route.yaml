@@ -1,0 +1,12 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: alertmanager
+spec:
+  to:
+    kind: Service
+    name: alertmanager
+  port:
+    targetPort: 9093
+  tls:
+    termination: edge
