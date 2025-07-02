@@ -9,27 +9,33 @@ groups:
     annotations:
       summary: "iDRAC system health critical for {{ $labels.instance }}"
       description: "The iDRAC system health status for {{ $labels.instance }} is Critical for 10 minutes."
-  
-  # Added rules translated from Grafana:
-  - alert: IDRACPowerSupplyCritical
-    expr: idrac_power_supply_health{job="idrac_exporter", status="Critical"} > 0
-    # Assuming 'for' duration wasn't specified or is 10m
-    for: 10m
-    labels:
-      severity: critical 
-    annotations:
-      summary: "iDRAC PSU status critical for {{ $labels.instance }}"
-      description: "A power supply unit status for {{ $labels.instance }} is Critical for 10 minutes."
 
-  - alert: IDRACDriveHealthCritical
-    expr: idrac_drive_health{job="idrac_exporter", status="Critical"} > 0
-    # Assuming 'for' duration wasn't specified or is 10m
+  - alert: SNMPSystemHealthCritical
+    expr: snmp_chassisStatus_info{chassisStatus!="ok"} > 0
     for: 10m
     labels:
       severity: critical
     annotations:
-      summary: "iDRAC drive health critical for {{ $labels.instance }}"
-      description: "A drive health status for {{ $labels.instance }} is Critical for 10 minutes."
+      summary: "SNMP system health critical for {{ $labels.instance }}"
+      description: "The SNMP chassis status for {{ $labels.instance }} is '{{ $labels.chassisStatus }}' for 10 minutes."
+
+  - alert: IPMIPowerSupplyRedundancyLost
+    expr: ipmi_sensor_state{name="PS Redundancy", type="Power Supply"} == 2
+    for: 10m
+    labels:
+      severity: critical
+    annotations:
+      summary: "IPMI PSU redundancy lost on {{ $labels.instance }}"
+      description: "Power supply redundancy is lost on {{ $labels.instance }} (sensor: {{ $labels.name }}) for 10 minutes."
+
+  - alert: IPMIDriveSlotIssue
+    expr: ipmi_sensor_state{type="Drive Slot"} == 2
+    for: 10m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Drive slot issue on {{ $labels.instance }} ({{ $labels.name }})"
+      description: "Drive {{ $labels.name }} on {{ $labels.instance }} reported a fault (state 2) for 10 minutes."
 
   - alert: IDRACChassisAmbientTempHigh
     expr: idrac_sensors_temperature{job="idrac_exporter", name="Chassis Ambient Temp"} > 50
@@ -40,4 +46,3 @@ groups:
     annotations:
       summary: "iDRAC chassis ambient temperature high for {{ $labels.instance }}"
       description: "Chassis Ambient Temp on {{ $labels.instance }} is above 50°C ({{ $value }}°C) for 10 minutes." 
-      
