@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: idrac-exporter
-          image: mrlhansen/idrac_exporter:latest
+          image: ghcr.io/naved001/idrac_exporter:v2.0.1
           ports:
             - containerPort: 9348
           volumeMounts:
