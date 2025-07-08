@@ -2,22 +2,13 @@ groups:
 - name: idrac.alerts
   rules:
   - alert: IDRACSystemHealthCritical
-    expr: idrac_system_health{job="idrac_exporter", status="Critical"} > 0
-    for: 10m
-    labels:
-      severity: critical # Adjust severity as needed for Alertmanager routing
-    annotations:
-      summary: "iDRAC system health critical for {{ $labels.instance }}"
-      description: "The iDRAC system health status for {{ $labels.instance }} is Critical for 10 minutes."
-
-  - alert: SNMPSystemHealthCritical
-    expr: snmp_chassisStatus_info{chassisStatus!="ok"} > 0
+    expr: idrac_system_health{status="Critical"} * on (instance) group_left(hostname, model, sku) idrac_system_machine_info
     for: 10m
     labels:
       severity: critical
     annotations:
-      summary: "SNMP system health critical for {{ $labels.instance }}"
-      description: "The SNMP chassis status for {{ $labels.instance }} is '{{ $labels.chassisStatus }}' for 10 minutes."
+      summary: "iDRAC system health critical for {{ $labels.instance }}"
+      description: "The iDRAC system health status for {{ $labels.instance }} (host: {{ $labels.hostname }}, model: {{ $labels.model }}, SKU: {{ $labels.sku }}) is Critical."
 
   - alert: IPMIPowerSupplyRedundancyLost
     expr: ipmi_sensor_state{name="PS Redundancy", type="Power Supply"} == 2
@@ -26,7 +17,7 @@ groups:
       severity: critical
     annotations:
       summary: "IPMI PSU redundancy lost on {{ $labels.instance }}"
-      description: "Power supply redundancy is lost on {{ $labels.instance }} (sensor: {{ $labels.name }}) for 10 minutes."
+      description: "Power supply redundancy is lost on {{ $labels.instance }} (sensor: {{ $labels.name }})."
 
   - alert: IPMIDriveSlotIssue
     expr: ipmi_sensor_state{type="Drive Slot"} == 2
@@ -35,14 +26,41 @@ groups:
       severity: critical
     annotations:
       summary: "Drive slot issue on {{ $labels.instance }} ({{ $labels.name }})"
-      description: "Drive {{ $labels.name }} on {{ $labels.instance }} reported a fault (state 2) for 10 minutes."
+      description: "Drive {{ $labels.name }} on {{ $labels.instance }} reported a fault (state 2)."
 
   - alert: IDRACChassisAmbientTempHigh
-    expr: idrac_sensors_temperature{job="idrac_exporter", name="Chassis Ambient Temp"} > 50
+    expr: idrac_sensors_temperature{name="Chassis Ambient Temp"} > 50
     # Assuming 'for' duration wasn't specified or is 10m
     for: 10m
     labels:
       severity: warning # Temp might be warning instead of critical
     annotations:
       summary: "iDRAC chassis ambient temperature high for {{ $labels.instance }}"
-      description: "Chassis Ambient Temp on {{ $labels.instance }} is above 50°C ({{ $value }}°C) for 10 minutes." 
+      description: "Chassis Ambient Temp on {{ $labels.instance }} is above 50°C ({{ $value }}°C)."
+
+  - alert: IDRACMemoryModuleIssue
+    expr: idrac_memory_module_health{status!="OK"} * on (instance) group_left(hostname, model, sku) idrac_system_machine_info
+    for: 10m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Memory module issue in {{ $labels.instance }}"
+      description: "Memory module {{ $labels.id }} on system {{ $labels.instance }} is  in {{ $labels.status }} state. More info: (host: {{ $labels.hostname }}, model: {{ $labels.model }}, SKU: {{ $labels.sku }}) ."
+
+  - alert: IDRACDriveIssue
+    expr: idrac_storage_drive_health{status!="OK"} * on (instance) group_left(hostname, model, sku) idrac_system_machine_info
+    for: 10m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Drive issue on {{ $labels.instance }}"
+      description: "Storage device {{ $labels.id }} on system {{ $labels.instance }} is  in {{ $labels.status }} state. More info: (host: {{ $labels.hostname }}, model: {{ $labels.model }}, SKU: {{ $labels.sku }}) ."
+
+  - alert: IPMIChassisCoolingFault
+    expr: ipmi_chassis_cooling_fault_state == 0
+    for: 10m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Chassis cooling fault detected in {{ $labels.instance }})"
+      description: "Chassis cooling fault detected on {{ $labels.instance }})"
