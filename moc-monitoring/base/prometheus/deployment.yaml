@@ -35,6 +35,9 @@ spec:
           - name: cmc-targets
             mountPath: /etc/prometheus/file_sd/cmc_targets.yaml
             subPath: cmc_targets.yaml
+          - name: lenovo-targets
+            mountPath: /etc/prometheus/file_sd/lenovo_targets.yaml
+            subPath: lenovo_targets.yaml
       volumes:
         - name: config-volume
           configMap:
@@ -48,6 +51,9 @@ spec:
         - name: cmc-targets
           configMap:
             name: cmc-targets
+        - name: lenovo-targets
+          configMap:
+            name: lenovo-targets
         - name: prometheus-storage
           persistentVolumeClaim:
             claimName: prometheus-pvc
