@@ -8,7 +8,7 @@ groups:
       severity: critical
     annotations:
       summary: "iDRAC system health critical for {{ $labels.instance }}"
-      description: "The iDRAC system health status for {{ $labels.instance }} (host: {{ $labels.hostname }}, model: {{ $labels.model }}, SKU: {{ $labels.sku }}) is Critical."
+      description: "The iDRAC system health status for {{ $labels.instance }} is critical. (host: {{ $labels.hostname }}, model: {{ $labels.model }}, ServiceTag: {{ $labels.sku }})"
 
   - alert: IPMIPowerSupplyRedundancyLost
     expr: ipmi_sensor_state{name="PS Redundancy", type="Power Supply"} == 2
