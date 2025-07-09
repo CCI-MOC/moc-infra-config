@@ -10,5 +10,5 @@ metrics:
   memory: true
   network: true
 events:
-  severity: warning  # CONFIG_EVENTS_SEVERITY=warning
-  maxage: 7d         # CONFIG_EVENTS_MAXAGE=7d
+  severity: ok  # CONFIG_EVENTS_SEVERITY=warning
+  maxage: 90d         # CONFIG_EVENTS_MAXAGE=7d
