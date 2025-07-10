@@ -29,4 +29,8 @@ configMapGenerator:
   - files/idrac_targets.yaml
   options:
     disableNameSuffixHash: true
-
+- name: lenovo-targets
+  files:
+  - files/lenovo_targets.yaml
+  options:
+    disableNameSuffixHash: true

@@ -5,3 +5,13 @@ modules:
     driver: "lanplus"
     privilege: "user"
     timeout: 10000
+    custom_args:
+      bmc:
+        # this one needed the "=" to work when ipmi exporter calls this
+        - "--cipher-suite-id=17"
+      dcmi:
+        - "--cipher-suite-id=17"
+      chassis:
+        - "--cipher-suite-id=17"
+      ipmi:
+        - "--cipher-suite 17" # yes, this one doesn't have id in the arg name

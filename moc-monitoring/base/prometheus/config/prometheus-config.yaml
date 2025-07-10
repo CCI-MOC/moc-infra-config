@@ -19,6 +19,7 @@ scrape_configs:
     file_sd_configs:
     - files:
       - /etc/prometheus/file_sd/idrac_targets.yaml
+      - /etc/prometheus/file_sd/lenovo_targets.yaml
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
@@ -32,6 +33,7 @@ scrape_configs:
     - files:
       - /etc/prometheus/file_sd/idrac_targets.yaml
       - /etc/prometheus/file_sd/cmc_targets.yaml
+      - /etc/prometheus/file_sd/lenovo_targets.yaml
     metrics_path: /probe
     params:
       module:
@@ -49,6 +51,7 @@ scrape_configs:
     - files:
       - /etc/prometheus/file_sd/idrac_targets.yaml
       - /etc/prometheus/file_sd/cmc_targets.yaml
+      - /etc/prometheus/file_sd/lenovo_targets.yaml
     metrics_path: /probe
     params:
       module:
@@ -68,6 +71,7 @@ scrape_configs:
     file_sd_configs:
     - files:
       - /etc/prometheus/file_sd/idrac_targets.yaml
+      - /etc/prometheus/file_sd/lenovo_targets.yaml
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
