@@ -1,32 +1,24 @@
 groups:
+- name: idrac.recording
+  rules:
+  - record: idrac_system_machine_info_fixed
+    expr: |
+      label_replace(idrac_system_machine_info{manufacturer="Dell Inc."}, "unique_id", "$1", "sku", "(.*)")
+      or
+      label_replace(idrac_system_machine_info{manufacturer!="Dell Inc."}, "unique_id", "$1", "serial", "(.*)")
+
 - name: idrac.alerts
   rules:
   - alert: IDRACSystemHealthCritical
-    expr: idrac_system_health{status="Critical"} * on (instance) group_left(hostname, model, sku) idrac_system_machine_info
+    expr: idrac_system_health{status="Critical"} * on (instance) group_left(hostname, model, unique_id) idrac_system_machine_info_fixed
     for: 10m
     labels:
       severity: critical
     annotations:
-      summary: "iDRAC system health critical for {{ $labels.instance }}"
-      description: "The iDRAC system health status for {{ $labels.instance }} (host: {{ $labels.hostname }}, model: {{ $labels.model }}, SKU: {{ $labels.sku }}) is Critical."
-
-  - alert: IPMIPowerSupplyRedundancyLost
-    expr: ipmi_sensor_state{name="PS Redundancy", type="Power Supply"} == 2
-    for: 10m
-    labels:
-      severity: critical
-    annotations:
-      summary: "IPMI PSU redundancy lost on {{ $labels.instance }}"
-      description: "Power supply redundancy is lost on {{ $labels.instance }} (sensor: {{ $labels.name }})."
-
-  - alert: IPMIDriveSlotIssue
-    expr: ipmi_sensor_state{type="Drive Slot"} == 2
-    for: 10m
-    labels:
-      severity: critical
-    annotations:
-      summary: "Drive slot issue on {{ $labels.instance }} ({{ $labels.name }})"
-      description: "Drive {{ $labels.name }} on {{ $labels.instance }} reported a fault (state 2)."
+      summary: "System health critical for {{ $labels.instance }}"
+      description: |
+        "The System health status for {{ $labels.instance }} is critical.
+        Host: {{ $labels.hostname }}, Model: {{ $labels.model }}, Identifier: {{ $labels.unique_id }})"
 
   - alert: IDRACChassisAmbientTempHigh
     expr: idrac_sensors_temperature{name="Chassis Ambient Temp"} > 50
@@ -36,25 +28,50 @@ groups:
       severity: warning # Temp might be warning instead of critical
     annotations:
       summary: "iDRAC chassis ambient temperature high for {{ $labels.instance }}"
-      description: "Chassis Ambient Temp on {{ $labels.instance }} is above 50°C ({{ $value }}°C)."
+      description: |
+        "Chassis Ambient Temp on {{ $labels.instance }} is above 50°C ({{ $value }}°C)."
 
   - alert: IDRACMemoryModuleIssue
-    expr: idrac_memory_module_health{status!="OK"} * on (instance) group_left(hostname, model, sku) idrac_system_machine_info
+    expr: idrac_memory_module_health{status!="OK"} * on (instance) group_left(hostname, model, unique_id) idrac_system_machine_info_fixed
     for: 10m
     labels:
       severity: critical
     annotations:
       summary: "Memory module issue in {{ $labels.instance }}"
-      description: "Memory module {{ $labels.id }} on system {{ $labels.instance }} is  in {{ $labels.status }} state. More info: (host: {{ $labels.hostname }}, model: {{ $labels.model }}, SKU: {{ $labels.sku }}) ."
+      description: |
+        "Memory module {{ $labels.id }} on system {{ $labels.instance }} is  in {{ $labels.status }} state.
+        Host: {{ $labels.hostname }}, Model: {{ $labels.model }}, Identifier: {{ $labels.unique_id }})"
 
   - alert: IDRACDriveIssue
-    expr: idrac_storage_drive_health{status!="OK"} * on (instance) group_left(hostname, model, sku) idrac_system_machine_info
+    expr: idrac_storage_drive_health{status!="OK"} * on (instance) group_left(hostname, model, unique_id) idrac_system_machine_info_fixed
     for: 10m
     labels:
       severity: critical
     annotations:
       summary: "Drive issue on {{ $labels.instance }}"
-      description: "Storage device {{ $labels.id }} on system {{ $labels.instance }} is  in {{ $labels.status }} state. More info: (host: {{ $labels.hostname }}, model: {{ $labels.model }}, SKU: {{ $labels.sku }}) ."
+      description: |
+        "Storage device {{ $labels.id }} on system {{ $labels.instance }} is  in {{ $labels.status }} state.
+        Host: {{ $labels.hostname }}, Model: {{ $labels.model }}, Identifier: {{ $labels.unique_id }})"
+
+  - alert: IPMIPowerSupplyRedundancyLost
+    expr: ipmi_sensor_state{name="PS Redundancy", type="Power Supply"} == 2
+    for: 10m
+    labels:
+      severity: critical
+    annotations:
+      summary: "IPMI PSU redundancy lost on {{ $labels.instance }}"
+      description: |
+        "Power supply redundancy is lost on {{ $labels.instance }} (sensor: {{ $labels.name }})."
+
+  - alert: IPMIDriveSlotIssue
+    expr: ipmi_sensor_state{type="Drive Slot"} == 2
+    for: 10m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Drive slot issue on {{ $labels.instance }} ({{ $labels.name }})"
+      description: |
+        "Drive {{ $labels.name }} on {{ $labels.instance }} reported a fault (state 2)."
 
   - alert: IPMIChassisCoolingFault
     expr: ipmi_chassis_cooling_fault_state == 0

@@ -12,6 +12,7 @@ spec:
         args:
         - "--config.file=/etc/alertmanager/alertmanager.yaml"
         - "--storage.path=/alertmanager"
+        - "--web.external-url=https://alertmanager-moc-monitoring.apps.moc-infra.massopen.cloud"
         ports:
         - name: alertmanager
           containerPort: 9093
