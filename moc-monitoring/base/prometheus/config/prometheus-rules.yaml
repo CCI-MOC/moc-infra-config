@@ -81,3 +81,12 @@ groups:
     annotations:
       summary: "Chassis cooling fault detected in {{ $labels.instance }})"
       description: "Chassis cooling fault detected on {{ $labels.instance }})"
+
+  - alert: IPMI_CMOS_battery
+    expr: ipmi_sensor_state{type="Battery"} == 2
+    for: 10m
+    labels:
+      severity: critical
+    annotations:
+      summary: "CMOS battery failure {{ $labels.instance }})"
+      description: "CMOS battery failure {{ $labels.instance }})"
