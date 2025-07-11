@@ -1,14 +1,22 @@
 groups:
+- name: idrac.recording
+  rules:
+  - record: idrac_system_machine_info_fixed
+    expr: |
+      label_replace(idrac_system_machine_info{manufacturer="Dell Inc."}, "unique_id", "$1", "sku", "(.*)")
+      or
+      label_replace(idrac_system_machine_info{manufacturer!="Dell Inc."}, "unique_id", "$1", "serial", "(.*)")
+
 - name: idrac.alerts
   rules:
   - alert: IDRACSystemHealthCritical
-    expr: idrac_system_health{status="Critical"} * on (instance) group_left(hostname, model, sku) idrac_system_machine_info
+    expr: idrac_system_health{status="Critical"} * on (instance) group_left(hostname, model, unique_id) idrac_system_machine_info_fixed
     for: 10m
     labels:
       severity: critical
     annotations:
-      summary: "iDRAC system health critical for {{ $labels.instance }}"
-      description: "The iDRAC system health status for {{ $labels.instance }} is critical. (host: {{ $labels.hostname }}, model: {{ $labels.model }}, ServiceTag: {{ $labels.sku }})"
+      summary: "System health critical for {{ $labels.instance }}"
+      description: "The System health status for {{ $labels.instance }} is critical. (host: {{ $labels.hostname }}, model: {{ $labels.model }}, Identifier: {{ $labels.unique_id }})"
 
   - alert: IPMIPowerSupplyRedundancyLost
     expr: ipmi_sensor_state{name="PS Redundancy", type="Power Supply"} == 2
@@ -39,22 +47,22 @@ groups:
       description: "Chassis Ambient Temp on {{ $labels.instance }} is above 50°C ({{ $value }}°C)."
 
   - alert: IDRACMemoryModuleIssue
-    expr: idrac_memory_module_health{status!="OK"} * on (instance) group_left(hostname, model, sku) idrac_system_machine_info
+    expr: idrac_memory_module_health{status!="OK"} * on (instance) group_left(hostname, model, unique_id) idrac_system_machine_info_fixed
     for: 10m
     labels:
       severity: critical
     annotations:
       summary: "Memory module issue in {{ $labels.instance }}"
-      description: "Memory module {{ $labels.id }} on system {{ $labels.instance }} is  in {{ $labels.status }} state. More info: (host: {{ $labels.hostname }}, model: {{ $labels.model }}, SKU: {{ $labels.sku }}) ."
+      description: "Memory module {{ $labels.id }} on system {{ $labels.instance }} is  in {{ $labels.status }} state. More info: (host: {{ $labels.hostname }}, model: {{ $labels.model }}, Identifier: {{ $labels.unique_id }}) ."
 
   - alert: IDRACDriveIssue
-    expr: idrac_storage_drive_health{status!="OK"} * on (instance) group_left(hostname, model, sku) idrac_system_machine_info
+    expr: idrac_storage_drive_health{status!="OK"} * on (instance) group_left(hostname, model, unique_id) idrac_system_machine_info_fixed
     for: 10m
     labels:
       severity: critical
     annotations:
       summary: "Drive issue on {{ $labels.instance }}"
-      description: "Storage device {{ $labels.id }} on system {{ $labels.instance }} is  in {{ $labels.status }} state. More info: (host: {{ $labels.hostname }}, model: {{ $labels.model }}, SKU: {{ $labels.sku }}) ."
+      description: "Storage device {{ $labels.id }} on system {{ $labels.instance }} is  in {{ $labels.status }} state. More info: (host: {{ $labels.hostname }}, model: {{ $labels.model }}, Identifier: {{ $labels.unique_id }}) ."
 
   - alert: IPMIChassisCoolingFault
     expr: ipmi_chassis_cooling_fault_state == 0
