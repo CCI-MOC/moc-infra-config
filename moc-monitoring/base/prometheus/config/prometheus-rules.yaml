@@ -90,3 +90,12 @@ groups:
     annotations:
       summary: "CMOS battery failure {{ $labels.instance }})"
       description: "CMOS battery failure {{ $labels.instance }})"
+
+  - alert: IPMIScrapeFailed
+    expr: ipmi_up{collector="ipmi"} == 0
+    for: 10m
+    labels:
+      severity: critical
+    annotations:
+      summary: "IPMI Scrape failed for {{ $labels.instance }})"
+      description: "IPMI Scrape failed for {{ $labels.instance }})"
