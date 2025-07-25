@@ -27,6 +27,8 @@ resources:
 - externalsecrets/
 - hyperconverged/kubevirt-hyperconverged.yaml
 - machineconfigs/
+- networkattachmentdefinitions
+- nodenetworkconfigurationpolicies
 - longhorn-settings
 
 patches:
