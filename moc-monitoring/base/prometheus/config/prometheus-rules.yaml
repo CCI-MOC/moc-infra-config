@@ -1,24 +1,80 @@
 groups:
 - name: idrac.recording
   rules:
+  # Enrich machine metadata to add hostname, model, etc.
   - record: idrac_system_machine_info_fixed
     expr: |
       label_replace(idrac_system_machine_info{manufacturer="Dell Inc."}, "unique_id", "$1", "sku", "(.*)")
       or
       label_replace(idrac_system_machine_info{manufacturer!="Dell Inc."}, "unique_id", "$1", "serial", "(.*)")
+  
+  # Record cleaned-up system health metric with only numeric values
+  - record: idrac_system_health_state
+    expr: |
+      # Convert status strings to numeric values for easier alerting
+      # 0 = OK, 1 = Warning, 2 = Critical
+      (
+        (idrac_system_health{status="OK"} * 0)
+        or
+        (idrac_system_health{status="Warning"} * 1)
+        or
+        (idrac_system_health{status="Critical"} * 2)
+      )
+      or
+      # Handle numeric values that may already exist
+      idrac_system_health{status=~"[0-9]+"}
+  
+  # Synthetic metric for critical or warning health OR no metric + unreachable exporter
+  - record: idrac_system_health_critical_or_unreachable
+    expr: |
+      # Improved logic to handle both string and numeric health values
+      # Attempts to address the "sticky critical" problem by including unreachable state
+      (
+        # Health is degraded (string values)
+        idrac_system_health{status!="OK",status=~"Warning|Critical"}
+        or
+        # Health is degraded (numeric values >= 1) 
+        idrac_system_health_state >= 1
+        or
+        # No health metric available AND exporter/probes are down (suggests unreachable after critical)
+        (absent(idrac_system_health) and (probe_success{job="idrac_web"} == 0 or probe_success{job="idrac_ping"} == 0))
+      )
+      * on(instance) group_left(hostname, model, unique_id) idrac_system_machine_info_fixed
 
 - name: idrac.alerts
   rules:
-  - alert: IDRACSystemHealthCritical
-    expr: idrac_system_health{status="Critical"} * on (instance) group_left(hostname, model, unique_id) idrac_system_machine_info_fixed
-    for: 10m
+  # PRIMARY HEALTH ALERT: Fires when system health is degraded (warning/critical)
+  # Uses improved logic using records to handle the "sticky critical" problem
+  - alert: IDRACSystemHealthDegraded
+    expr: |
+      idrac_system_health_critical_or_unreachable >= 1
+    for: 2m
     labels:
       severity: critical
+      category: system_health
     annotations:
-      summary: "System health critical for {{ $labels.instance }}"
+      summary: "iDRAC System Health is degraded: {{ $labels.instance }}"
       description: |
-        "The System health status for {{ $labels.instance }} is critical.
-        Host: {{ $labels.hostname }}, Model: {{ $labels.model }}, Identifier: {{ $labels.unique_id }})"
+        iDRAC reports degraded system health.
+        Status: {{ $value }} (1 = Warning, 2 = Critical)
+        Host: {{ $labels.hostname }}, Model: {{ $labels.model }}, ID: {{ $labels.unique_id }}
+
+  # UNREACHABLE HEALTH ALERT: Fires when exporter is down AND no health data available
+  # This catches cases where the system becomes unreachable after reporting issues
+  - alert: IDRACExporterUnreachableWithNoHealth
+    expr: |
+      idrac_system_health_critical_or_unreachable
+      unless idrac_system_health_state >= 1
+    for: 5m
+    labels:
+      severity: critical
+      category: unreachable
+    annotations:
+      summary: "iDRAC Exporter unreachable with no health metric: {{ $labels.instance }}"
+      description: |
+        iDRAC exporter is down and no system health metric is being reported.
+        This may indicate the system became unreachable after reporting issues.
+        Host: {{ $labels.hostname }}, Model: {{ $labels.model }}, ID: {{ $labels.unique_id }}
 
   - alert: IDRACChassisAmbientTempHigh
     expr: idrac_sensors_temperature{name="Chassis Ambient Temp"} > 50
@@ -99,3 +155,20 @@ groups:
     annotations:
       summary: "IPMI Scrape failed for {{ $labels.instance }})"
       description: "IPMI Scrape failed for {{ $labels.instance }})"
+
+  # CONNECTIVITY ALERT: Simple check for iDRAC reachability
+  # Provides basic monitoring of iDRAC connectivity separate from health issues
+  - alert: IDRACUnreachable
+    expr: |
+      (probe_success{job="idrac_ping"} == 0 or probe_success{job="idrac_web"} == 0)
+      * on (instance) group_left(hostname, model, unique_id) idrac_system_machine_info_fixed
+    for: 5m
+    labels:
+      severity: warning  # Lower severity since health alerts cover critical cases
+      category: connectivity
+    annotations:
+      summary: "iDRAC unreachable: {{ $labels.instance }}"
+      description: |
+        The iDRAC for {{ $labels.instance }} is unreachable (ping or web access failed).
+        Host: {{ $labels.hostname }}, Model: {{ $labels.model }}, Identifier: {{ $labels.unique_id }}
+        This may indicate network issues, power problems, or iDRAC failure.
