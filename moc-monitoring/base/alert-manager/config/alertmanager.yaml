@@ -2,10 +2,10 @@ global:
   resolve_timeout: 5m
 
 route:
-  group_by: ['alertname', 'instance']
-  group_wait: 1s
+  group_by: ['alertname']
+  group_wait: 3m
   group_interval: 5m
-  repeat_interval: 24h
+  repeat_interval: 12h
   receiver: 'slack-alert-notifications'
   routes:
   - receiver: 'slack-alert-notifications'
@@ -17,8 +17,23 @@ receivers:
   slack_configs:
   - api_url_file: /etc/alertmanager/secrets/webhook
     send_resolved: true
-    title: '[{{ if eq .Status "firing" }}Firing: 🔥{{ else }}Resolved: ✅{{ end }}] {{ .CommonLabels.alertname }} on {{ .CommonLabels.instance }}'
+    title: >
+      [{{ if eq .Status "firing" }}🔥 Firing{{ else }}✅ Resolved{{ end }}]
+      {{ .CommonLabels.alertname }} on {{ .CommonLabels.instance }}
     text: >-
-      {{ range .Alerts }}
-        {{ .Annotations.description }}
+      *📢 Alert Group Summary*
+      *Status:* {{ .Status }}
+      *Instance:* {{ .CommonLabels.instance }}
+      *Alert Count:* {{ len .Alerts }}
+
+      *Group Labels:*
+      {{ range $key, $value := .GroupLabels }}• *{{$key}}:* `{{$value}}`
       {{ end }}
+
+      *Alerts List:*
+      {{ range .Alerts }}
+      • *{{ .Labels.severity | toUpper }}* — {{ .Annotations.summary }}
+        _Description_: {{ .Annotations.description }}
+        _Started_: {{ .StartsAt.Format "2006-01-02 15:04:05 MST" }}
+      {{ end }}
+      ---
