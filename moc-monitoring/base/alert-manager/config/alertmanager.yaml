@@ -22,3 +22,13 @@ receivers:
       {{ range .Alerts }}
         {{ .Annotations.description }}
       {{ end }}
+      
+inhibit_rules:
+  - source_matchers:
+      - scope = "component"
+      - severity =~ "warning|critical"
+    target_matchers:
+      - scope = "system"
+      - severity =~ "warning|critical"
+    equal:
+      - instance
