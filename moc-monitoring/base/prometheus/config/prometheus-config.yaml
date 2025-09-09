@@ -64,6 +64,61 @@ scrape_configs:
     - target_label: __address__
       replacement: blackbox-exporter.moc-monitoring.svc:9115
 
+  - job_name: "esi_icmp_probe"
+    static_configs:
+      - targets:
+        - esi.massopen.cloud # horizon
+        - esi-undercloud.massopen.cloud
+        - 129.10.5.141 # controller 1
+        - 129.10.5.142 # controller 2
+        - 129.10.5.143 # controller 3
+    metrics_path: /probe
+    params:
+      module:
+      - ping
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: blackbox-exporter.moc-monitoring.svc:9115
+
+  - job_name: "esi_http_probe"
+    static_configs:
+      - targets:
+        - esi.massopen.cloud:13696 # neutron
+        - esi.massopen.cloud:13000 # keystone
+        - esi.massopen.cloud:13050 # ironic inspector
+        - esi.massopen.cloud:13385 # ironic
+    metrics_path: /probe
+    params:
+      module:
+      - http_2xx
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: blackbox-exporter.moc-monitoring.svc:9115
+
+  - job_name: "esi_http_horizon_probe"
+    static_configs:
+      - targets:
+        - esi.massopen.cloud # horizon
+    metrics_path: /probe
+    params:
+      module:
+      - http_302
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: blackbox-exporter.moc-monitoring.svc:9115
+
   - job_name: "ipmi"
     params:
       module: ['default']
