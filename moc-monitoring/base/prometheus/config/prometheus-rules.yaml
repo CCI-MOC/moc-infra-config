@@ -142,3 +142,32 @@ groups:
       description: |
         "IPMI Scrape failed for {{ $labels.instance }}.
         {{ if $labels.hostname }}Host: {{ $labels.hostname }}{{ if $labels.model }}, Model: {{ $labels.model }}{{ end }}{{ if $labels.unique_id }}, ID: {{ $labels.unique_id }}{{ end }}{{ else }}Note: Limited system information available{{ end }}"
+  
+- name: esi.blackbox.alerts
+  rules:
+  - alert: ESI_Host_Unreachable
+    expr: probe_success{job="esi_icmp_probe"} == 0
+    for: 3m
+    labels:
+      severity: critical
+    annotations:
+      summary: "ESI host unreachable via ICMP (instance {{ $labels.instance }})"
+      description: "Host {{ $labels.instance }} has been unreachable via ICMP for more than 2 minutes"
+
+  - alert: ESI_HTTP_Service_Down
+    expr: probe_success{job="esi_http_probe"} == 0
+    for: 3m
+    labels:
+      severity: critical
+    annotations:
+      summary: "ESI HTTP service down (instance {{ $labels.instance }})"
+      description: "HTTP service {{ $labels.instance }} has been down for more than 3 minutes"
+
+  - alert: ESI_Horizon_Down
+    expr: probe_success{job="esi_http_horizon_probe"} == 0
+    for: 3m
+    labels:
+      severity: critical
+    annotations:
+      summary: "ESI Horizon web interface down"
+      description: "Horizon web interface at {{ $labels.instance }} has been down for more than 3 minutes"
