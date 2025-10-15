@@ -160,8 +160,8 @@ groups:
     labels:
       severity: critical
     annotations:
-      summary: "ESI HTTP service down (instance {{ $labels.instance }})"
-      description: "HTTP service {{ $labels.instance }} has been down for more than 3 minutes"
+      summary: "ESI service down (instance {{ $labels.instance }})"
+      description: "ESI Service {{ $labels.instance }} has been down for more than 3 minutes"
 
   - alert: ESI_Horizon_Down
     expr: probe_success{job="esi_http_horizon_probe"} == 0
