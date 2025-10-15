@@ -10,3 +10,4 @@ patches:
   - path: deployments/idrac-exporter_patch.yaml
   - path: deployments/ipmi-exporter_patch.yaml
   - path: deployments/snmp-exporter_patch.yaml
+  - path: deployments/blackbox-exporter_patch.yaml
