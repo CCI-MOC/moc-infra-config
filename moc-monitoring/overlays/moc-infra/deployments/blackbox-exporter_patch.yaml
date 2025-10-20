@@ -1,0 +1,14 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blackbox-exporter
+spec:
+  template:
+    metadata:
+      annotations:
+        k8s.v1.cni.cncf.io/networks: |
+          [
+            { "name": "ipmi-vlan-911", "ips": ["10.2.0.8/19"] },
+            { "name": "ipmi-vlan-912", "ips": ["10.3.0.8/19"] },
+            { "name": "ipmi-vlan-913", "ips": ["10.4.0.8/19"] }
+          ]

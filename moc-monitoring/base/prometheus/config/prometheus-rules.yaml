@@ -39,7 +39,7 @@ groups:
     annotations:
       summary: "Memory module issue in {{ $labels.instance }}"
       description: |
-        "Memory module {{ $labels.id }} on system {{ $labels.instance }} is  in {{ $labels.status }} state.
+        "Memory module {{ $labels.id }} on system {{ $labels.instance }} is in {{ $labels.status }} state.
         Host: {{ $labels.hostname }}, Model: {{ $labels.model }}, Identifier: {{ $labels.unique_id }})"
 
   - alert: IDRACDriveIssue
@@ -50,52 +50,124 @@ groups:
     annotations:
       summary: "Drive issue on {{ $labels.instance }}"
       description: |
-        "Storage device {{ $labels.id }} on system {{ $labels.instance }} is  in {{ $labels.status }} state.
+        "Storage device {{ $labels.id }} on system {{ $labels.instance }} is in {{ $labels.status }} state.
         Host: {{ $labels.hostname }}, Model: {{ $labels.model }}, Identifier: {{ $labels.unique_id }})"
 
   - alert: IPMIPowerSupplyRedundancyLost
-    expr: ipmi_sensor_state{name="PS Redundancy", type="Power Supply"} == 2
+    expr: |
+      (
+        ipmi_sensor_state{name="PS Redundancy", type="Power Supply"} == 2
+      ) * on (instance) group_left(hostname, model, unique_id) idrac_system_machine_info_fixed
+      or on (instance)
+      (
+        ipmi_sensor_state{name="PS Redundancy", type="Power Supply"} == 2
+      )
     for: 10m
     labels:
       severity: critical
     annotations:
       summary: "IPMI PSU redundancy lost on {{ $labels.instance }}"
       description: |
-        "Power supply redundancy is lost on {{ $labels.instance }} (sensor: {{ $labels.name }})."
+        "Power supply redundancy is lost on {{ $labels.instance }} (sensor: {{ $labels.name }}).
+        {{ if $labels.hostname }}Host: {{ $labels.hostname }}{{ if $labels.model }}, Model: {{ $labels.model }}{{ end }}{{ if $labels.unique_id }}, ID: {{ $labels.unique_id }}{{ end }}{{ else }}Note: Limited system information available{{ end }}"
 
   - alert: IPMIDriveSlotIssue
-    expr: ipmi_sensor_state{type="Drive Slot"} == 2
+    expr: |
+      (
+        ipmi_sensor_state{type="Drive Slot"} == 2
+      ) * on (instance) group_left(hostname, model, unique_id) idrac_system_machine_info_fixed
+      or on (instance)
+      (
+        ipmi_sensor_state{type="Drive Slot"} == 2
+      )
     for: 10m
     labels:
       severity: critical
     annotations:
       summary: "Drive slot issue on {{ $labels.instance }} ({{ $labels.name }})"
       description: |
-        "Drive {{ $labels.name }} on {{ $labels.instance }} reported a fault (state 2)."
+        "Drive {{ $labels.name }} on {{ $labels.instance }} reported a fault (state 2).
+        {{ if $labels.hostname }}Host: {{ $labels.hostname }}{{ if $labels.model }}, Model: {{ $labels.model }}{{ end }}{{ if $labels.unique_id }}, ID: {{ $labels.unique_id }}{{ end }}{{ else }}Note: Limited system information available{{ end }}"
 
   - alert: IPMIChassisCoolingFault
-    expr: ipmi_chassis_cooling_fault_state == 0
+    expr: |
+      (
+        ipmi_chassis_cooling_fault_state == 0
+      ) * on (instance) group_left(hostname, model, unique_id) idrac_system_machine_info_fixed
+      or on (instance)
+      (
+        ipmi_chassis_cooling_fault_state == 0
+      )
     for: 10m
     labels:
       severity: critical
     annotations:
-      summary: "Chassis cooling fault detected in {{ $labels.instance }})"
-      description: "Chassis cooling fault detected on {{ $labels.instance }})"
+      summary: "Chassis cooling fault detected in {{ $labels.instance }}"
+      description: |
+        "Chassis cooling fault detected on {{ $labels.instance }}.
+        {{ if $labels.hostname }}Host: {{ $labels.hostname }}{{ if $labels.model }}, Model: {{ $labels.model }}{{ end }}{{ if $labels.unique_id }}, ID: {{ $labels.unique_id }}{{ end }}{{ else }}Note: Limited system information available{{ end }}"
 
   - alert: IPMI_CMOS_battery
-    expr: ipmi_sensor_state{type="Battery"} == 2
+    expr: |
+      (
+        ipmi_sensor_state{type="Battery"} == 2
+      ) * on (instance) group_left(hostname, model, unique_id) idrac_system_machine_info_fixed
+      or on (instance)
+      (
+        ipmi_sensor_state{type="Battery"} == 2
+      )
     for: 10m
     labels:
       severity: critical
     annotations:
-      summary: "CMOS battery failure {{ $labels.instance }})"
-      description: "CMOS battery failure {{ $labels.instance }})"
+      summary: "CMOS battery failure {{ $labels.instance }}"
+      description: |
+        "CMOS battery failure {{ $labels.instance }}.
+        {{ if $labels.hostname }}Host: {{ $labels.hostname }}{{ if $labels.model }}, Model: {{ $labels.model }}{{ end }}{{ if $labels.unique_id }}, ID: {{ $labels.unique_id }}{{ end }}{{ else }}Note: Limited system information available{{ end }}"
 
   - alert: IPMIScrapeFailed
-    expr: ipmi_up{collector="ipmi"} == 0
+    expr: |
+      (
+        ipmi_up{collector="ipmi"} == 0
+      ) * on (instance) group_left(hostname, model, unique_id) idrac_system_machine_info_fixed
+      or on (instance)
+      (
+        ipmi_up{collector="ipmi"} == 0
+      )
     for: 10m
     labels:
       severity: critical
     annotations:
-      summary: "IPMI Scrape failed for {{ $labels.instance }})"
-      description: "IPMI Scrape failed for {{ $labels.instance }})"
+      summary: "IPMI Scrape failed for {{ $labels.instance }}"
+      description: |
+        "IPMI Scrape failed for {{ $labels.instance }}.
+        {{ if $labels.hostname }}Host: {{ $labels.hostname }}{{ if $labels.model }}, Model: {{ $labels.model }}{{ end }}{{ if $labels.unique_id }}, ID: {{ $labels.unique_id }}{{ end }}{{ else }}Note: Limited system information available{{ end }}"
+  
+- name: esi.blackbox.alerts
+  rules:
+  - alert: ESI_Host_Unreachable
+    expr: probe_success{job="esi_icmp_probe"} == 0
+    for: 3m
+    labels:
+      severity: critical
+    annotations:
+      summary: "ESI host unreachable via ICMP (instance {{ $labels.instance }})"
+      description: "Host {{ $labels.instance }} has been unreachable via ICMP for more than 2 minutes"
+
+  - alert: ESI_HTTP_Service_Down
+    expr: probe_success{job="esi_http_probe"} == 0
+    for: 3m
+    labels:
+      severity: critical
+    annotations:
+      summary: "ESI service down (instance {{ $labels.instance }})"
+      description: "ESI Service {{ $labels.instance }} has been down for more than 3 minutes"
+
+  - alert: ESI_Horizon_Down
+    expr: probe_success{job="esi_http_horizon_probe"} == 0
+    for: 3m
+    labels:
+      severity: critical
+    annotations:
+      summary: "ESI Horizon web interface down"
+      description: "Horizon web interface at {{ $labels.instance }} has been down for more than 3 minutes"
