@@ -16,14 +16,14 @@ repos:
       - id: check-symlinks
       - id: detect-private-key
   - repo: https://github.com/adrienverge/yamllint.git
-    rev: v1.35.1
+    rev: v1.37.1
     hooks:
       - id: yamllint
         files: \.(yaml|yml)$
         types: [file, yaml]
         entry: yamllint --strict
   - repo: https://github.com/koalaman/shellcheck-precommit
-    rev: v0.10.0
+    rev: v0.11.0
     hooks:
       - id: shellcheck
         args: [--severity=error]
