@@ -10,7 +10,7 @@ route:
   routes:
   - receiver: 'slack-alert-notifications'
     matchers:
-      - job=~"idrac_exporter|idrac_snmp|ipmi"
+      - job=~"idrac_.*||esi_.*|ipmi"
 
 receivers:
 - name: 'slack-alert-notifications'
