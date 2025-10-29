@@ -58,7 +58,7 @@ groups:
       (
         ipmi_sensor_state{name="PS Redundancy", type="Power Supply"} == 2
       ) * on (instance) group_left(hostname, model, unique_id) idrac_system_machine_info_fixed
-      or on (instance)
+      or
       (
         ipmi_sensor_state{name="PS Redundancy", type="Power Supply"} == 2
       )
@@ -76,7 +76,7 @@ groups:
       (
         ipmi_sensor_state{type="Drive Slot"} == 2
       ) * on (instance) group_left(hostname, model, unique_id) idrac_system_machine_info_fixed
-      or on (instance)
+      or
       (
         ipmi_sensor_state{type="Drive Slot"} == 2
       )
@@ -94,7 +94,7 @@ groups:
       (
         ipmi_chassis_cooling_fault_state == 0
       ) * on (instance) group_left(hostname, model, unique_id) idrac_system_machine_info_fixed
-      or on (instance)
+      or
       (
         ipmi_chassis_cooling_fault_state == 0
       )
@@ -112,7 +112,7 @@ groups:
       (
         ipmi_sensor_state{type="Battery"} == 2
       ) * on (instance) group_left(hostname, model, unique_id) idrac_system_machine_info_fixed
-      or on (instance)
+      or
       (
         ipmi_sensor_state{type="Battery"} == 2
       )
@@ -130,7 +130,7 @@ groups:
       (
         ipmi_up{collector="ipmi"} == 0
       ) * on (instance) group_left(hostname, model, unique_id) idrac_system_machine_info_fixed
-      or on (instance)
+      or
       (
         ipmi_up{collector="ipmi"} == 0
       )
