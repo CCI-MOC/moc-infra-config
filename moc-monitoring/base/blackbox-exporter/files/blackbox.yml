@@ -11,8 +11,8 @@ modules:
       fail_if_header_not_matches:
         - header: Location
           regexp: 'start\.html'
-      preferred_ip_protocol: "ip4" # defaults to "ip6"
-      ip_protocol_fallback: false  # no fallback to "ip6"
+      preferred_ip_protocol: "ip4"  # defaults to "ip6"
+      ip_protocol_fallback: false   # no fallback to "ip6"
   ping:
     prober: icmp
     timeout: 5s
@@ -27,5 +27,5 @@ modules:
       method: GET
       tls_config:
         insecure_skip_verify: false
-      preferred_ip_protocol: "ip4" # defaults to "ip6"
+      preferred_ip_protocol: "ip4"  # defaults to "ip6"
       ip_protocol_fallback: false  # no fallback to "ip6"

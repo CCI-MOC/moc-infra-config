@@ -25,7 +25,7 @@ groups:
     # Assuming 'for' duration wasn't specified or is 10m
     for: 10m
     labels:
-      severity: warning # Temp might be warning instead of critical
+      severity: warning  # Temp might be warning instead of critical
     annotations:
       summary: "iDRAC chassis ambient temperature high for {{ $labels.instance }}"
       description: |
@@ -142,7 +142,7 @@ groups:
       description: |
         "IPMI Scrape failed for {{ $labels.instance }}.
         {{ if $labels.hostname }}Host: {{ $labels.hostname }}{{ if $labels.model }}, Model: {{ $labels.model }}{{ end }}{{ if $labels.unique_id }}, ID: {{ $labels.unique_id }}{{ end }}{{ else }}Note: Limited system information available{{ end }}"
-  
+
 - name: esi.blackbox.alerts
   rules:
   - alert: ESI_Host_Unreachable
