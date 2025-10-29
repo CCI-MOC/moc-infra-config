@@ -14,4 +14,4 @@ modules:
       chassis:
         - "--cipher-suite-id=17"
       ipmi:
-        - "--cipher-suite 17" # yes, this one doesn't have id in the arg name
+        - "--cipher-suite 17"  # yes, this one doesn't have id in the arg name

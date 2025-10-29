@@ -4,4 +4,4 @@ metadata:
   name: neu-vlan-127
 spec:
   ipAddressPools:
-   - neu-vlan-127
+    - neu-vlan-127
