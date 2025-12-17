@@ -5,6 +5,7 @@ resources:
 - ../../base/argoproj.io/argocds/openshift-gitops
 - ../../base/config.openshift.io/oauths/cluster
 - ../../base/config.openshift.io/apiservers/cluster
+- ../../base/core/configmaps/admin-acks
 - ../../base/cdi.kubevirt.io/storageprofiles/longhorn
 - ../../base/operator.openshift.io/ingresscontrollers/default
 - ../../base/rbac.authorization.k8s.io/clusterrolebindings/cluster-admins-sudoer
@@ -30,6 +31,14 @@ resources:
 - networkattachmentdefinitions
 - nodenetworkconfigurationpolicies
 - longhorn-settings
+
+configMapGenerator:
+- name: admin-acks
+  namespace: openshift-config
+  behavior: merge
+  literals:
+    - ack-4.18-kube-1.32-api-removals-in-4.19=true
+    - ack-4.15-kube-1.29-api-removals-in-4.16=true
 
 patches:
   - path: argocds/openshift-gitops_patch.yaml
