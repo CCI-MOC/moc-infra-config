@@ -1,173 +1,271 @@
 groups:
-- name: idrac.recording
-  rules:
-  - record: idrac_system_machine_info_fixed
-    expr: |
-      label_replace(idrac_system_machine_info{manufacturer="Dell Inc."}, "unique_id", "$1", "sku", "(.*)")
-      or
-      label_replace(idrac_system_machine_info{manufacturer!="Dell Inc."}, "unique_id", "$1", "serial", "(.*)")
+  - name: idrac.sticky_helpers
+    interval: 15s
+    rules:
+      # Normalize/enrich machine info
+      - record: idrac_system_machine_info_fixed
+        expr: |
+          label_replace(idrac_system_machine_info{manufacturer="Dell Inc."}, "unique_id", "$1", "sku", "(.*)")
+          or
+          label_replace(idrac_system_machine_info{manufacturer!="Dell Inc."}, "unique_id", "$1", "serial", "(.*)")
 
-- name: idrac.alerts
-  rules:
-  - alert: IDRACSystemHealthCritical
-    expr: idrac_system_health{status="Critical"} * on (instance) group_left(hostname, model, unique_id) idrac_system_machine_info_fixed
-    for: 10m
-    labels:
-      severity: critical
-    annotations:
-      summary: "System health critical for {{ $labels.instance }}"
-      description: |
-        "The System health status for {{ $labels.instance }} is critical.
-        Host: {{ $labels.hostname }}, Model: {{ $labels.model }}, Identifier: {{ $labels.unique_id }})"
+      # Health stickiness - extended time window approach
+      # Recently degraded if any health issue in last 2 hours (long persistence)
+      - record: idrac_system_health_recently_degraded
+        expr: max_over_time(idrac_system_health[2h]) >= 1
+      # Currently healthy and reachable for at least 3 minutes
+      - record: idrac_system_health_confirmed_healthy
+        expr: |
+          (idrac_system_health == 0) and (up{job="idrac_exporter"} == 1)
+          and
+          (min_over_time(idrac_system_health[3m]) == 0) and (min_over_time(up{job="idrac_exporter"}[3m]) == 1)
+      # Sticky logic: degraded recently UNLESS confirmed healthy for 3m
+      - record: idrac_system_health_sticky
+        expr: idrac_system_health_recently_degraded unless idrac_system_health_confirmed_healthy
 
-  - alert: IDRACChassisAmbientTempHigh
-    expr: idrac_sensors_temperature{name="Chassis Ambient Temp"} > 50
-    # Assuming 'for' duration wasn't specified or is 10m
-    for: 10m
-    labels:
-      severity: warning  # Temp might be warning instead of critical
-    annotations:
-      summary: "iDRAC chassis ambient temperature high for {{ $labels.instance }}"
-      description: |
-        "Chassis Ambient Temp on {{ $labels.instance }} is above 50°C ({{ $value }}°C)."
+      # Temperature stickiness - extended time window approach
+      # Recently high temp if > 50°C in last 2 hours (long persistence)
+      - record: idrac_chassis_ambient_temp_recently_high
+        expr: max_over_time(idrac_sensors_temperature{name="Chassis Ambient Temp"}[2h]) > 50
+      # Currently normal temp and reachable for at least 3 minutes
+      - record: idrac_chassis_ambient_temp_confirmed_normal
+        expr: |
+          (idrac_sensors_temperature{name="Chassis Ambient Temp"} <= 50) and (up{job="idrac_exporter"} == 1)
+          and
+          (max_over_time(idrac_sensors_temperature{name="Chassis Ambient Temp"}[3m]) <= 50) and (min_over_time(up{job="idrac_exporter"}[3m]) == 1)
+      # Sticky logic: high recently UNLESS confirmed normal for 3m
+      - record: idrac_chassis_ambient_temp_sticky
+        expr: idrac_chassis_ambient_temp_recently_high unless idrac_chassis_ambient_temp_confirmed_normal
 
-  - alert: IDRACMemoryModuleIssue
-    expr: idrac_memory_module_health{status!="OK"} * on (instance) group_left(hostname, model, unique_id) idrac_system_machine_info_fixed
-    for: 10m
-    labels:
-      severity: critical
-    annotations:
-      summary: "Memory module issue in {{ $labels.instance }}"
-      description: |
-        "Memory module {{ $labels.id }} on system {{ $labels.instance }} is in {{ $labels.status }} state.
-        Host: {{ $labels.hostname }}, Model: {{ $labels.model }}, Identifier: {{ $labels.unique_id }})"
+      # Memory module stickiness - extended time window approach
+      # Recently had memory issues if any module was non-OK in last 2 hours
+      - record: idrac_memory_module_issue_recent
+        expr: |
+          (
+            count_over_time(idrac_memory_module_health{status!="OK"}[2h]) > 0
+          )
+      # All memory modules confirmed OK and reachable for at least 3 minutes
+      - record: idrac_memory_modules_confirmed_ok
+        expr: |
+          (count by (instance) (idrac_memory_module_health{status="OK"}) == count by (instance) (idrac_memory_module_health))
+          and (up{job="idrac_exporter"} == 1)
+          and
+          (
+            (count_over_time(idrac_memory_module_health{status!="OK"}[3m]) == 0)
+            and (min_over_time(up{job="idrac_exporter"}[3m]) == 1)
+          )
+      # Sticky logic: had issues recently UNLESS confirmed all OK for 3m
+      - record: idrac_memory_module_issue_sticky
+        expr: idrac_memory_module_issue_recent unless idrac_memory_modules_confirmed_ok
 
-  - alert: IDRACDriveIssue
-    expr: idrac_storage_drive_health{status!="OK"} * on (instance) group_left(hostname, model, unique_id) idrac_system_machine_info_fixed
-    for: 10m
-    labels:
-      severity: critical
-    annotations:
-      summary: "Drive issue on {{ $labels.instance }}"
-      description: |
-        "Storage device {{ $labels.id }} on system {{ $labels.instance }} is in {{ $labels.status }} state.
-        Host: {{ $labels.hostname }}, Model: {{ $labels.model }}, Identifier: {{ $labels.unique_id }})"
+      # Drive health stickiness - extended time window approach
+      # Recently had drive issues if any drive was non-OK in last 2 hours
+      - record: idrac_drive_issue_recent
+        expr: |
+          (
+            count_over_time(idrac_storage_drive_health{status!="OK"}[2h]) > 0
+          )
+      # All drives confirmed OK and reachable for at least 3 minutes
+      - record: idrac_drives_confirmed_ok
+        expr: |
+          (count by (instance) (idrac_storage_drive_health{status="OK"}) == count by (instance) (idrac_storage_drive_health))
+          and (up{job="idrac_exporter"} == 1)
+          and
+          (
+            (count_over_time(idrac_storage_drive_health{status!="OK"}[3m]) == 0)
+            and (min_over_time(up{job="idrac_exporter"}[3m]) == 1)
+          )
+      # Sticky logic: had issues recently UNLESS confirmed all OK for 3m
+      - record: idrac_drive_issue_sticky
+        expr: idrac_drive_issue_recent unless idrac_drives_confirmed_ok
 
-  - alert: IPMIPowerSupplyRedundancyLost
-    expr: |
-      (
-        ipmi_sensor_state{name="PS Redundancy", type="Power Supply"} == 2
-      ) * on (instance) group_left(hostname, model, unique_id) idrac_system_machine_info_fixed
-      or
-      (
-        ipmi_sensor_state{name="PS Redundancy", type="Power Supply"} == 2
-      )
-    for: 10m
-    labels:
-      severity: critical
-    annotations:
-      summary: "IPMI PSU redundancy lost on {{ $labels.instance }}"
-      description: |
-        "Power supply redundancy is lost on {{ $labels.instance }} (sensor: {{ $labels.name }}).
-        {{ if $labels.hostname }}Host: {{ $labels.hostname }}{{ if $labels.model }}, Model: {{ $labels.model }}{{ end }}{{ if $labels.unique_id }}, ID: {{ $labels.unique_id }}{{ end }}{{ else }}Note: Limited system information available{{ end }}"
+  - name: idrac.alerts
+    interval: 20s
+    rules:
+      - alert: IDRACSystemHealthDegraded
+        expr: |
+          (
+            idrac_system_health_sticky
+            * on(instance) group_left(hostname, model, unique_id) idrac_system_machine_info_fixed
+          )
+          or
+          (
+            idrac_system_health_sticky
+            unless on(instance) idrac_system_machine_info_fixed
+          )
+        for: 30s
+        keep_firing_for: 2m
+        labels:
+          severity: critical
+          category: system_health
+        annotations:
+          summary: "iDRAC System Health degraded: {{ $labels.instance }}{{ if $labels.hostname }} ({{ $labels.hostname }}){{ end }}"
+          description: |
+            {{ if $labels.hostname }}Host: {{ $labels.hostname }}{{ if $labels.model }}, Model: {{ $labels.model }}{{ end }}{{ if $labels.unique_id }}, ID: {{ $labels.unique_id }}{{ end }}
+            {{ else }}Instance: {{ $labels.instance }}{{ end }}
+            Uses sticky logic to retain the alert across reachability loss.
+            Sticky logic: degraded recently or iDRAC unreachable while metrics are missing.
 
-  - alert: IPMIDriveSlotIssue
-    expr: |
-      (
-        ipmi_sensor_state{type="Drive Slot"} == 2
-      ) * on (instance) group_left(hostname, model, unique_id) idrac_system_machine_info_fixed
-      or
-      (
-        ipmi_sensor_state{type="Drive Slot"} == 2
-      )
-    for: 10m
-    labels:
-      severity: critical
-    annotations:
-      summary: "Drive slot issue on {{ $labels.instance }} ({{ $labels.name }})"
-      description: |
-        "Drive {{ $labels.name }} on {{ $labels.instance }} reported a fault (state 2).
-        {{ if $labels.hostname }}Host: {{ $labels.hostname }}{{ if $labels.model }}, Model: {{ $labels.model }}{{ end }}{{ if $labels.unique_id }}, ID: {{ $labels.unique_id }}{{ end }}{{ else }}Note: Limited system information available{{ end }}"
+      - alert: IDRACChassisAmbientTempHigh
+        expr: idrac_chassis_ambient_temp_sticky
+        for: 10m
+        labels:
+          severity: warning
+          category: temperature
+        annotations:
+          summary: "Chassis ambient temperature high or recently high: {{ $labels.instance }}"
+          description: |
+            iDRAC reports chassis ambient > 50°C, or metrics are missing while iDRAC is unreachable.
 
-  - alert: IPMIChassisCoolingFault
-    expr: |
-      (
-        ipmi_chassis_cooling_fault_state == 0
-      ) * on (instance) group_left(hostname, model, unique_id) idrac_system_machine_info_fixed
-      or
-      (
-        ipmi_chassis_cooling_fault_state == 0
-      )
-    for: 10m
-    labels:
-      severity: critical
-    annotations:
-      summary: "Chassis cooling fault detected in {{ $labels.instance }}"
-      description: |
-        "Chassis cooling fault detected on {{ $labels.instance }}.
-        {{ if $labels.hostname }}Host: {{ $labels.hostname }}{{ if $labels.model }}, Model: {{ $labels.model }}{{ end }}{{ if $labels.unique_id }}, ID: {{ $labels.unique_id }}{{ end }}{{ else }}Note: Limited system information available{{ end }}"
+      - alert: IDRACMemoryModuleIssue
+        expr: idrac_memory_module_issue_sticky
+        for: 10m
+        labels:
+          severity: critical
+          category: hardware
+        annotations:
+          summary: "Memory module issue (sticky) on {{ $labels.instance }}"
+          description: |
+            One or more memory modules reported non-OK recently, or metrics are missing while iDRAC is unreachable.
 
-  - alert: IPMI_CMOS_battery
-    expr: |
-      (
-        ipmi_sensor_state{type="Battery"} == 2
-      ) * on (instance) group_left(hostname, model, unique_id) idrac_system_machine_info_fixed
-      or
-      (
-        ipmi_sensor_state{type="Battery"} == 2
-      )
-    for: 10m
-    labels:
-      severity: critical
-    annotations:
-      summary: "CMOS battery failure {{ $labels.instance }}"
-      description: |
-        "CMOS battery failure {{ $labels.instance }}.
-        {{ if $labels.hostname }}Host: {{ $labels.hostname }}{{ if $labels.model }}, Model: {{ $labels.model }}{{ end }}{{ if $labels.unique_id }}, ID: {{ $labels.unique_id }}{{ end }}{{ else }}Note: Limited system information available{{ end }}"
+      - alert: IDRACDriveIssue
+        expr: idrac_drive_issue_sticky
+        for: 10m
+        labels:
+          severity: critical
+          category: storage
+        annotations:
+          summary: "Drive issue (sticky) on {{ $labels.instance }}"
+          description: |
+            A drive reported non-OK recently, or metrics are missing while iDRAC is unreachable.
 
-  - alert: IPMIScrapeFailed
-    expr: |
-      (
-        ipmi_up{collector="ipmi"} == 0
-      ) * on (instance) group_left(hostname, model, unique_id) idrac_system_machine_info_fixed
-      or
-      (
-        ipmi_up{collector="ipmi"} == 0
-      )
-    for: 10m
-    labels:
-      severity: critical
-    annotations:
-      summary: "IPMI Scrape failed for {{ $labels.instance }}"
-      description: |
-        "IPMI Scrape failed for {{ $labels.instance }}.
-        {{ if $labels.hostname }}Host: {{ $labels.hostname }}{{ if $labels.model }}, Model: {{ $labels.model }}{{ end }}{{ if $labels.unique_id }}, ID: {{ $labels.unique_id }}{{ end }}{{ else }}Note: Limited system information available{{ end }}"
+      - alert: IDRACUnreachable
+        expr: up{job="idrac_exporter"} == 0
+        for: 5m
+        keep_firing_for: 2m
+        labels:
+          severity: warning
+          category: connectivity
+        annotations:
+          summary: "iDRAC unreachable: {{ $labels.instance }}"
+          description: |
+            The iDRAC exporter cannot scrape the target. Network, power, or iDRAC failure suspected.
 
-- name: esi.blackbox.alerts
-  rules:
-  - alert: ESI_Host_Unreachable
-    expr: probe_success{job="esi_icmp_probe"} == 0
-    for: 3m
-    labels:
-      severity: critical
-    annotations:
-      summary: "ESI host unreachable via ICMP (instance {{ $labels.instance }})"
-      description: "Host {{ $labels.instance }} has been unreachable via ICMP for more than 2 minutes"
+      - alert: IPMIPowerSupplyRedundancyLost
+        expr: |
+          (
+            ipmi_sensor_state{name="PS Redundancy", type="Power Supply"} == 2
+          ) * on (instance) group_left(hostname, model, unique_id) idrac_system_machine_info_fixed
+          or
+          (
+            ipmi_sensor_state{name="PS Redundancy", type="Power Supply"} == 2
+          )
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "IPMI PSU redundancy lost on {{ $labels.instance }}"
+          description: |
+            "Power supply redundancy is lost on {{ $labels.instance }} (sensor: {{ $labels.name }}).
+            {{ if $labels.hostname }}Host: {{ $labels.hostname }}{{ if $labels.model }}, Model: {{ $labels.model }}{{ end }}{{ if $labels.unique_id }}, ID: {{ $labels.unique_id }}{{ end }}{{ else }}Note: Limited system information available{{ end }}"
 
-  - alert: ESI_HTTP_Service_Down
-    expr: probe_success{job="esi_http_probe"} == 0
-    for: 3m
-    labels:
-      severity: critical
-    annotations:
-      summary: "ESI service down (instance {{ $labels.instance }})"
-      description: "ESI Service {{ $labels.instance }} has been down for more than 3 minutes"
+      - alert: IPMIDriveSlotIssue
+        expr: |
+          (
+            ipmi_sensor_state{type="Drive Slot"} == 2
+          ) * on (instance) group_left(hostname, model, unique_id) idrac_system_machine_info_fixed
+          or
+          (
+            ipmi_sensor_state{type="Drive Slot"} == 2
+          )
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Drive slot issue on {{ $labels.instance }} ({{ $labels.name }})"
+          description: |
+            "Drive {{ $labels.name }} on {{ $labels.instance }} reported a fault (state 2).
+            {{ if $labels.hostname }}Host: {{ $labels.hostname }}{{ if $labels.model }}, Model: {{ $labels.model }}{{ end }}{{ if $labels.unique_id }}, ID: {{ $labels.unique_id }}{{ end }}{{ else }}Note: Limited system information available{{ end }}"
 
-  - alert: ESI_Horizon_Down
-    expr: probe_success{job="esi_http_horizon_probe"} == 0
-    for: 3m
-    labels:
-      severity: critical
-    annotations:
-      summary: "ESI Horizon web interface down"
-      description: "Horizon web interface at {{ $labels.instance }} has been down for more than 3 minutes"
+      - alert: IPMIChassisCoolingFault
+        expr: |
+          (
+            ipmi_chassis_cooling_fault_state == 0
+          ) * on (instance) group_left(hostname, model, unique_id) idrac_system_machine_info_fixed
+          or
+          (
+            ipmi_chassis_cooling_fault_state == 0
+          )
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Chassis cooling fault detected in {{ $labels.instance }}"
+          description: |
+            "Chassis cooling fault detected on {{ $labels.instance }}.
+            {{ if $labels.hostname }}Host: {{ $labels.hostname }}{{ if $labels.model }}, Model: {{ $labels.model }}{{ end }}{{ if $labels.unique_id }}, ID: {{ $labels.unique_id }}{{ end }}{{ else }}Note: Limited system information available{{ end }}"
+
+      - alert: IPMI_CMOS_battery
+        expr: |
+          (
+            ipmi_sensor_state{type="Battery"} == 2
+          ) * on (instance) group_left(hostname, model, unique_id) idrac_system_machine_info_fixed
+          or
+          (
+            ipmi_sensor_state{type="Battery"} == 2
+          )
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "CMOS battery failure {{ $labels.instance }}"
+          description: |
+            "CMOS battery failure {{ $labels.instance }}.
+            {{ if $labels.hostname }}Host: {{ $labels.hostname }}{{ if $labels.model }}, Model: {{ $labels.model }}{{ end }}{{ if $labels.unique_id }}, ID: {{ $labels.unique_id }}{{ end }}{{ else }}Note: Limited system information available{{ end }}"
+
+      - alert: IPMIScrapeFailed
+        expr: |
+          (
+            ipmi_up{collector="ipmi"} == 0
+          ) * on (instance) group_left(hostname, model, unique_id) idrac_system_machine_info_fixed
+          or
+          (
+            ipmi_up{collector="ipmi"} == 0
+          )
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "IPMI Scrape failed for {{ $labels.instance }}"
+          description: |
+            "IPMI Scrape failed for {{ $labels.instance }}.
+            {{ if $labels.hostname }}Host: {{ $labels.hostname }}{{ if $labels.model }}, Model: {{ $labels.model }}{{ end }}{{ if $labels.unique_id }}, ID: {{ $labels.unique_id }}{{ end }}{{ else }}Note: Limited system information available{{ end }}"
+
+  - name: esi.blackbox.alerts
+    rules:
+    - alert: ESI_Host_Unreachable
+      expr: probe_success{job="esi_icmp_probe"} == 0
+      for: 3m
+      labels:
+        severity: critical
+      annotations:
+        summary: "ESI host unreachable via ICMP (instance {{ $labels.instance }})"
+        description: "Host {{ $labels.instance }} has been unreachable via ICMP for more than 2 minutes"
+
+    - alert: ESI_HTTP_Service_Down
+      expr: probe_success{job="esi_http_probe"} == 0
+      for: 3m
+      labels:
+        severity: critical
+      annotations:
+        summary: "ESI service down (instance {{ $labels.instance }})"
+        description: "ESI Service {{ $labels.instance }} has been down for more than 3 minutes"
+
+    - alert: ESI_Horizon_Down
+      expr: probe_success{job="esi_http_horizon_probe"} == 0
+      for: 3m
+      labels:
+        severity: critical
+      annotations:
+        summary: "ESI Horizon web interface down"
+        description: "Horizon web interface at {{ $labels.instance }} has been down for more than 3 minutes"
