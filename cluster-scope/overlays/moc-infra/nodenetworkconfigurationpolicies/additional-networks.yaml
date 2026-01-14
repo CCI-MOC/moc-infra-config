@@ -1,0 +1,71 @@
+apiVersion: nmstate.io/v1
+kind: NodeNetworkConfigurationPolicy
+metadata:
+  name: additional-networks
+spec:
+  nodeSelector:
+    node-role.kubernetes.io/worker: ""
+  desiredState:
+    interfaces:
+    - name: br-native  # to access public IPs on vlan 127
+      type: linux-bridge
+      state: up
+      ipv4: {enabled: false}
+      ipv6: {enabled: false}
+      bridge:
+        options:
+          stp:
+            enabled: false
+        port:
+        - name: ens3f0np0
+    - name: vlan911
+      type: vlan
+      state: up
+      vlan:
+        base-iface: ens3f0np0
+        id: 911
+    - name: br911
+      type: linux-bridge
+      state: up
+      ipv4: {enabled: false}
+      ipv6: {enabled: false}
+      bridge:
+        options:
+          stp:
+            enabled: false
+        port:
+        - name: vlan911
+    - name: vlan912
+      type: vlan
+      state: up
+      vlan:
+        base-iface: ens3f0np0
+        id: 912
+    - name: br912
+      type: linux-bridge
+      state: up
+      ipv4: {enabled: false}
+      ipv6: {enabled: false}
+      bridge:
+        options:
+          stp:
+            enabled: false
+        port:
+        - name: vlan912
+    - name: vlan913
+      type: vlan
+      state: up
+      vlan:
+        base-iface: ens3f0np0
+        id: 913
+    - name: br913
+      type: linux-bridge
+      state: up
+      ipv4: {enabled: false}
+      ipv6: {enabled: false}
+      bridge:
+        options:
+          stp:
+            enabled: false
+        port:
+        - name: vlan913

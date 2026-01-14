@@ -6,9 +6,8 @@ metadata:
 spec:
   config: '{
     "cniVersion": "0.3.1",
-    "type": "macvlan",
-    "master": "vlan911",
-    "mode": "bridge",
+    "type": "bridge",
+    "bridge": "br911",
     "ipam": {
       "type": "static"
     }
