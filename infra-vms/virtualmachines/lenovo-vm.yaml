@@ -1,0 +1,79 @@
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  labels:
+    "kubevirt.io/vm-delete-protection": "True"
+  name: lenovo-vm
+spec:
+  runStrategy: Always
+  template:
+    spec:
+      evictionStrategy: LiveMigrate
+      domain:
+        devices:
+          interfaces:
+          - name: default
+            masquerade: {}
+          - name: neu-public
+            bridge: {}
+          - name: ipmi-vlan-911
+            bridge: {}
+          disks:
+          - name: boot-disk
+            disk:
+              bus: virtio
+          - name: cloudinitdisk
+            disk:
+              bus: virtio
+        cpu:
+          sockets: 1
+          cores: 4
+          threads: 1
+        resources:
+          requests:
+            memory: 8Gi
+            cpu: 1
+          limits:
+            memory: 9Gi
+            cpu: 4
+      networks:
+      - name: default
+        pod: {}
+      - name: neu-public
+        multus:
+          networkName: infrastructure-vms/vlan127-no-ipam
+      - name: ipmi-vlan-911
+        multus:
+          networkName: infrastructure-vms/vlan911-no-ipam
+      volumes:
+      - name: boot-disk
+        dataVolume:
+          name: lenovo-vm-rootdisk
+      - name: cloudinitdisk
+        cloudInitNoCloud:
+          networkData: |
+            version: 2
+            ethernets:
+              eth0:
+                dhcp4: true
+                dhcp4-overrides:
+                  route-metric: 200
+                routes:
+                  - to: 10.128.0.0/14
+                    via: 10.0.2.1
+                    metric: 50
+              eth1:
+                addresses:
+                - 129.10.5.118/24
+                gateway4: 129.10.5.1
+                nameservers:
+                  addresses: [8.8.8.8]
+              eth2:
+                dhcp4: true
+                dhcp4-overrides:
+                  route-metric: 300
+          userData: |
+            #cloud-config
+            ssh_authorized_keys:
+              - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDwxZw52X4wl4PT2gQwjxg8LnLcAc7R+kNFVYkxbsTO89jWhjK7J+Giz+gUNOioBz4IY6/5SCd0tGYFCp4m0F7a8Pp9JRr8aEtpzjaC6LTtD17UxK5+IJxxKCaF3FZ6yvWGU77umvm3oRszv+2rILqSLUjgc//LyaaIasgV2HIbOCUkgwynEBrEDhH2Ma5Ie8z+9u7M63xvUXrYsp0a5otTepjb+8CELq9qO+/xJeWBGhl7F1uUTD3b+eemqntIAr/G/30UNE9TpHsTlVTTnhaMmIz233U9Kz2aGt14UraLvI7u7dhPgJ2R0JQTXrdJjA97Rk/CrRy/gquy8/m4MzCt
+              - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDQp8R8MOF/2Ay6Kj8MDpIuCGHfNH1ZNx3KYrmQFIeArdgePXjjFC0lM1WCjBL0nR5Mrd7qzvQYS51mZPoO1ye8hFCYQ/yYnoq0KlhXOKYJC+mRwPAg6OAD/cRe1b2nV3TRRvlRJZigZ+daV6wGUUk3F5Cplngvbgkvp48aGBor+HYlq+uHFZg+1ghci7/iEksUPY6OEjErtAC7GTBNWxx28EsEPnquOV9Whqxzj/3H56Znf6bT3CEPahNsJCucEqv8bhINzO+743WRocHMRF5tsxftQvL7d6FgwHzTfPfbrLv8JAPLUNvfaoVBFqpCe7rbC9B8Blr4JKpHf5/OMY+F

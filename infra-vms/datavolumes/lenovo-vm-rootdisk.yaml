@@ -1,0 +1,17 @@
+apiVersion: cdi.kubevirt.io/v1beta1
+kind: DataVolume
+metadata:
+  name: lenovo-vm-rootdisk
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=False
+spec:
+  source:
+    pvc:
+      namespace: infrastructure-vms
+      name: rocky9-golden-image
+  pvc:
+    accessModes:
+      - ReadWriteMany
+    resources:
+      requests:
+        storage: 30Gi
