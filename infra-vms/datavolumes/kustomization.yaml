@@ -3,3 +3,5 @@ kind: Kustomization
 resources:
   - rocky9-golden-image.yaml
   - lenovo-vm-rootdisk.yaml
+  - maas-vm-rootdisk.yaml
+  - ubuntu24-04-golden-image.yaml

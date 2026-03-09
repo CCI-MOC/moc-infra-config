@@ -3,3 +3,4 @@ kind: Kustomization
 resources:
   - vlan-127-no-ipam.yaml
   - vlan-911-no-ipam.yaml
+  - vlan-204-no-ipam.yaml

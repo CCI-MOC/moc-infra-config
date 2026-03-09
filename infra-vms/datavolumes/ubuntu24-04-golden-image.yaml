@@ -1,0 +1,14 @@
+apiVersion: cdi.kubevirt.io/v1beta1
+kind: DataVolume
+metadata:
+  name: ubuntu24-04-golden-image
+spec:
+  source:
+    http:
+      url: "https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img"
+  pvc:
+    accessModes:
+      - ReadWriteOnce
+    resources:
+      requests:
+        storage: 20Gi
