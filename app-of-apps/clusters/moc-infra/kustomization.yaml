@@ -4,5 +4,6 @@ resources:
   - cluster-resources
   - metallb
   - moc-monitoring
+  - librenms
 
 nameSuffix: -moc-infra
