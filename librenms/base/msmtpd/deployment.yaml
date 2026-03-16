@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: msmtpd
+  namespace: librenms
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: msmtpd
+  template:
+    metadata:
+      labels:
+        app: msmtpd
+    spec:
+      serviceAccountName: librenms-sa
+      securityContext:
+        fsGroup: 1000
+      containers:
+        - name: msmtpd
+          image: crazymax/msmtpd:1.8.32

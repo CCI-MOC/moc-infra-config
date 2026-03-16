@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: librenms-web
+  namespace: librenms
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: librenms-web
+  template:
+    metadata:
+      labels:
+        app: librenms-web
+    spec:
+      enableServiceLinks: false
+      serviceAccountName: librenms-sa
+      imagePullSecrets:
+        - name: docker-hub-secret
+      securityContext:
+        fsGroup: 1000
+      containers:
+        - name: librenms
+          image: librenms/librenms:26.2.0
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1024Mi
+          securityContext:
+            capabilities:
+              add:
+              - "NET_ADMIN"
+              - "NET_RAW"
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: librenms-config
+            - secretRef:
+                name: librenms-secrets
+          env:
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: librenms-config
+                  key: MYSQL_DATABASE
+            - name: DB_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: librenms-config
+                  key: MYSQL_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: librenms-secrets
+                  key: MYSQL_PASSWORD
+          volumeMounts:
+            - name: shared-data
+              mountPath: /data
+            - name: rrd-data
+              mountPath: /data/rrd
+      volumes:
+      - name: shared-data
+        persistentVolumeClaim:
+          claimName: librenms-data
+      - name: rrd-data
+        persistentVolumeClaim:
+          claimName: rrdcached-db

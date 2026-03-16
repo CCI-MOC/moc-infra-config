@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rrdcached
+  namespace: librenms
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: rrdcached
+  template:
+    metadata:
+      labels:
+        app: rrdcached
+    spec:
+      serviceAccountName: librenms-sa
+      securityContext:
+        fsGroup: 1000
+      containers:
+      - name: rrdcached
+        image: crazymax/rrdcached:1.9.0-r4
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        ports:
+        - containerPort: 42217
+        env:
+        - name: TZ
+          valueFrom:
+            configMapKeyRef:
+              name: librenms-config
+              key: TZ
+        - name: PUID
+          value: "1000"
+        - name: PGID
+          value: "1000"
+        - name: LOG_LEVEL
+          value: "LOG_INFO"
+        - name: WRITE_TIMEOUT
+          value: "1800"
+        - name: WRITE_JITTER
+          value: "1800"
+        - name: WRITE_THREADS
+          value: "4"
+        - name: FLUSH_DEAD_DATA_INTERVAL
+          value: "3600"
+        volumeMounts:
+        - mountPath: /data/db
+          name: db
+        - mountPath: /data/journal
+          name: journal
+      volumes:
+      - name: db
+        persistentVolumeClaim:
+          claimName: rrdcached-db
+      - name: journal
+        persistentVolumeClaim:
+          claimName: rrdcached-journal
