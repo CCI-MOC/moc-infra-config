@@ -35,13 +35,13 @@ spec:
             enabled: false
         port:
         - name: vlan911
-    - name: vlan912
+    - name: vlan215
       type: vlan
       state: up
       vlan:
         base-iface: ens3f0np0
-        id: 912
-    - name: br912
+        id: 215
+    - name: br215
       type: linux-bridge
       state: up
       ipv4: {enabled: false}
@@ -51,21 +51,4 @@ spec:
           stp:
             enabled: false
         port:
-        - name: vlan912
-    - name: vlan913
-      type: vlan
-      state: up
-      vlan:
-        base-iface: ens3f0np0
-        id: 913
-    - name: br913
-      type: linux-bridge
-      state: up
-      ipv4: {enabled: false}
-      ipv6: {enabled: false}
-      bridge:
-        options:
-          stp:
-            enabled: false
-        port:
-        - name: vlan913
+        - name: vlan215
