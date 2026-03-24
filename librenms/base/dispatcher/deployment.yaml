@@ -5,13 +5,7 @@ metadata:
   namespace: librenms
 spec:
   replicas: 1
-  selector:
-    matchLabels:
-      app: librenms-dispatcher
   template:
-    metadata:
-      labels:
-        app: librenms-dispatcher
     spec:
       enableServiceLinks: false
       serviceAccountName: librenms-sa
@@ -19,7 +13,7 @@ spec:
         fsGroup: 1000
       containers:
         - name: librenms
-          image: librenms/librenms:26.2.0
+          image: docker.io/librenms/librenms:26.2.0
           imagePullPolicy: IfNotPresent
           resources:
             requests:
@@ -59,14 +53,14 @@ spec:
             - name: DISPATCHER_NODE_ID
               value: "dispatcher1"
           volumeMounts:
-            - name: shared-data
+            - name: librenms-data
               mountPath: /data
-            - name: rrd-data
+            - name: rrdcached-db
               mountPath: /data/rrd
       volumes:
-        - name: shared-data
+        - name: librenms-data
           persistentVolumeClaim:
             claimName: librenms-data
-        - name: rrd-data
+        - name: rrdcached-db
           persistentVolumeClaim:
             claimName: rrdcached-db

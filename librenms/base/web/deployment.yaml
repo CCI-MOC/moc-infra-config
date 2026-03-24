@@ -5,23 +5,15 @@ metadata:
   namespace: librenms
 spec:
   replicas: 1
-  selector:
-    matchLabels:
-      app: librenms-web
   template:
-    metadata:
-      labels:
-        app: librenms-web
     spec:
       enableServiceLinks: false
       serviceAccountName: librenms-sa
-      imagePullSecrets:
-        - name: docker-hub-secret
       securityContext:
         fsGroup: 1000
       containers:
         - name: librenms
-          image: librenms/librenms:26.2.0
+          image: docker.io/librenms/librenms:26.2.0
           imagePullPolicy: IfNotPresent
           resources:
             requests:
@@ -59,14 +51,14 @@ spec:
                   name: librenms-secrets
                   key: MYSQL_PASSWORD
           volumeMounts:
-            - name: shared-data
+            - name: librenms-data
               mountPath: /data
-            - name: rrd-data
+            - name: rrdcached-db
               mountPath: /data/rrd
       volumes:
-      - name: shared-data
+      - name: librenms-data
         persistentVolumeClaim:
           claimName: librenms-data
-      - name: rrd-data
+      - name: rrdcached-db
         persistentVolumeClaim:
           claimName: rrdcached-db

@@ -6,5 +6,3 @@ metadata:
 spec:
   ports:
     - port: 2500
-  selector:
-    app: msmtpd

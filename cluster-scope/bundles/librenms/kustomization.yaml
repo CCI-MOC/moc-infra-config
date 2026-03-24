@@ -6,7 +6,6 @@ labels:
     massopen.cloud/bundle: librenms
 resources:
 - ../../base/core/namespaces/librenms
-- ../../base/core/serviceaccounts/librenms-sa
 - ../../base/rbac.authorization.k8s.io/rolebindings/use-librenms-scc
 - ../../base/rbac.authorization.k8s.io/clusterroles/use-librenms-scc
 - ../../base/security.openshift.io/securitycontextconstraints/librenms-netadmin

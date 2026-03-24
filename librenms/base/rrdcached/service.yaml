@@ -7,5 +7,3 @@ spec:
   ports:
   - port: 42217
     targetPort: 42217
-  selector:
-    app: rrdcached

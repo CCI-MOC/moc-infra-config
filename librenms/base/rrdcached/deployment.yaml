@@ -7,20 +7,14 @@ spec:
   replicas: 1
   strategy:
     type: Recreate
-  selector:
-    matchLabels:
-      app: rrdcached
   template:
-    metadata:
-      labels:
-        app: rrdcached
     spec:
       serviceAccountName: librenms-sa
       securityContext:
         fsGroup: 1000
       containers:
       - name: rrdcached
-        image: crazymax/rrdcached:1.9.0-r4
+        image: docker.io/crazymax/rrdcached:1.9.0-r4
         imagePullPolicy: IfNotPresent
         resources:
           requests:
@@ -53,13 +47,13 @@ spec:
           value: "3600"
         volumeMounts:
         - mountPath: /data/db
-          name: db
+          name: rrdcached-db
         - mountPath: /data/journal
-          name: journal
+          name: rrdcached-journal
       volumes:
-      - name: db
+      - name: rrdcached-db
         persistentVolumeClaim:
           claimName: rrdcached-db
-      - name: journal
+      - name: rrdcached-journal
         persistentVolumeClaim:
           claimName: rrdcached-journal
