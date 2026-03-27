@@ -5,6 +5,7 @@ namespace: moc-monitoring
 resources:
 - ../../base
 - externalsecrets
+- networkattachmentdefinitions
 
 patches:
   - path: deployments/idrac-exporter_patch.yaml
