@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: rrdcached
+  namespace: librenms
+spec:
+  ports:
+  - port: 42217
+    targetPort: 42217

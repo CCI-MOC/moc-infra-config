@@ -16,6 +16,7 @@ resources:
 - ../../base/user.openshift.io/groups/cluster-readers
 - ../../bundles/external-secrets
 - ../../bundles/longhorn
+- ../../bundles/librenms
 - ../../bundles/metallb-system
 - ../../bundles/nmstate
 - ../../bundles/openshift-gitops-operator

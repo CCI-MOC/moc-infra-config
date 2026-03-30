@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: librenms
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: redis
+          image: docker.io/redis:8.6-alpine
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          args: ["--save", ""]
+          envFrom:
+            - configMapRef:
+                name: librenms-config
