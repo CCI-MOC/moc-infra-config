@@ -1,0 +1,12 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: librenms-dispatcher
+spec:
+  template:
+    metadata:
+      annotations:
+        k8s.v1.cni.cncf.io/networks: |
+          [
+            { "name": "management-vlan-215", "ips": ["10.10.0.16/22"] }
+          ]
