@@ -4,6 +4,9 @@ namespace: librenms
 resources:
   - ../../base
   - externalsecrets
+  - networkattachmentdefinitions
 
 patches:
   - path: route-host-patch.yaml
+  - path: deployments/librenms-dispatcher_patch.yaml
+  - path: deployments/librenms-web_patch.yaml
