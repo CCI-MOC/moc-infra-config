@@ -18,6 +18,23 @@ spec:
             enabled: false
         port:
         - name: ens3f0np0
+    - name: vlan204
+      type: vlan
+      state: up
+      vlan:
+        base-iface: ens3f0np0
+        id: 204
+    - name: br204
+      type: linux-bridge
+      state: up
+      ipv4: {enabled: false}
+      ipv6: {enabled: false}
+      bridge:
+        options:
+          stp:
+            enabled: false
+        port:
+        - name: vlan204
     - name: vlan911
       type: vlan
       state: up
