@@ -10,10 +10,8 @@ spec:
     server: https://acme-v02.api.letsencrypt.org/directory
     solvers:
       - dns01:
-          cnameStrategy: Follow
           route53:
             region: us-east-1
-            hostedZoneID: Z04486682XFINHTESP6B9
             accessKeyIDSecretRef:
               key: AWS_ACCESS_KEY_ID
               name: aws-route53-credentials
