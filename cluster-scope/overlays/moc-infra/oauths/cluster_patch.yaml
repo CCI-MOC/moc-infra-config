@@ -14,3 +14,24 @@ spec:
       teams:
       - CCI-MOC/ops-core
       - CCI-MOC/moc-openshift-people
+  - name: mocsso
+    mappingMethod: claim
+    type: OpenID
+    openID:
+      clientID: moc-infra
+      clientSecret:
+        name: keycloak-client-secret
+      claims:
+        preferredUsername:
+        - preferred_username
+        - username
+        name:
+        - name
+        - full name
+        email:
+        - email
+        groups:
+        - groups
+      issuer: https://sso.massopen.cloud/realms/moc
+      extraScopes:
+      - groups
