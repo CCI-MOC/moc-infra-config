@@ -16,7 +16,8 @@ resources:
 - ../../base/rbac.authorization.k8s.io/clusterrolebindings/self-provisioners
 - ../../base/user.openshift.io/groups/cluster-admins
 - ../../base/user.openshift.io/groups/cluster-readers
-- ../../bundles/external-secrets
+- ../../base/core/namespaces/external-secrets-operator
+- ../../bundles/openshift-external-secrets-operator
 - ../../bundles/longhorn
 - ../../bundles/librenms
 - ../../bundles/metallb-system
