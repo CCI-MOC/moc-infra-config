@@ -3,4 +3,3 @@ kind: Kustomization
 resources:
   - github-secret.yaml
   - keycloak-client-secret.yaml
-  - aws-route-53.yaml

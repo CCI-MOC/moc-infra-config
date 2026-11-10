@@ -27,6 +27,7 @@ resources:
 - ../../bundles/openshift-cnv
 - ../../cert-manager.io/clusterissuers/letsencrypt-production-dns01
 - clusterversion.yaml
+- serviceaccounts/external-secrets-sa.yaml
 - clustersecretstore/clustersecretstore.yaml
 - certificates/
 - externalsecrets/

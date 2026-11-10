@@ -12,12 +12,13 @@ spec:
       - dns01:
           route53:
             region: us-east-1
-            accessKeyIDSecretRef:
-              key: AWS_ACCESS_KEY_ID
-              name: aws-route53-credentials
-            secretAccessKeySecretRef:
-              key: AWS_SECRET_ACCESS_KEY
-              name: aws-route53-credentials
+            # Role is created by the openshift-oidc module in CCI-MOC/moc-aws
+            # and trusts only system:serviceaccount:cert-manager:cert-manager.
+            role: arn:aws:iam::574733721584:role/cert-manager-moc-infra
+            auth:
+              kubernetes:
+                serviceAccountRef:
+                  name: cert-manager
         selector:
           dnsZones:
             - moc-infra.massopen.cloud
