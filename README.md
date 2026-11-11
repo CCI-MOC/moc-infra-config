@@ -12,6 +12,18 @@ You could use sshuttle to forward your traffic like:
 sshuttle -r kzn-ipmi-gw.infra.massopen.cloud 172.16.0.0/19
 ```
 
+## Authentication
+
+Users log in through MOC SSO (`mocsso` identity provider, Keycloak at
+sso.massopen.cloud, realm `moc`). Keycloak groups are synced to the cluster
+from the `groups` claim at login. Members of the `open-accelerator-admins`
+group get `sudoer` and `cluster-reader` on the cluster and admin in ArgoCD.
+
+Groups are created in [moc-keycloak][]; membership is managed in Keycloak,
+not in this repository.
+
+[moc-keycloak]: https://github.com/CCI-MOC/moc-keycloak
+
 ## Deploying Secrets
 
 Secrets are stored in AWS Secret Manager and accessed on the cluser via
@@ -20,7 +32,7 @@ an `ExternalSecret`.
 The name of the secret must start with `cluster/moc-infra/`. The secret will not be accessible
 otherwise. See [example][]
 
-[example]: https://github.com/CCI-MOC/moc-infra-config/blob/f6e71d3cf21ae9166337aaf48de3fd9eb9790ee9/cluster-scope/overlays/moc-infra/externalsecrets/github-secret.yaml
+[example]: cluster-scope/overlays/moc-infra/externalsecrets/keycloak-client-secret.yaml
 
 ## AWS access (OIDC)
 

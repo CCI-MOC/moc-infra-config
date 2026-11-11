@@ -63,7 +63,6 @@ spec:
     defaultPolicy: ""
     policy: |
       g, system:cluster-admins, role:admin
-      g, cluster-admins, role:admin
       g, open-accelerator-admins, role:admin
     scopes: '[groups]'
   redis:
